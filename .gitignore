@@ -22,6 +22,7 @@ var/
 wheels/
 share/python-wheels/
 *.egg-info/
+src/*.egg-info/
 .installed.cfg
 *.egg
 MANIFEST
@@ -77,6 +78,7 @@ target/
 
 # Jupyter Notebook
 .ipynb_checkpoints
+.jupyter_runtime/
 
 # IPython
 profile_default/
@@ -135,15 +137,24 @@ cython_debug/
 .DS_Store
 Thumbs.db
 
-# Data files (common in Data Science projects)
-*.csv
+# Data files (large or generated)
+data/raw/*
+data/processed/*
+models/*
 *.tsv
 *.dat
 *.hdf5
 *.h5
 *.parquet
-*.json
-# Exclude small datasets if you explicitly want to version them with !data/sample.csv
+
+# Keep reusable report/evaluation outputs in version control.
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!models/.gitkeep
+!results/*.csv
+!results/*.json
+!results/*.png
+!report_assets/*.png
 
 # uv specific notes:
 # `uv.lock` should usually be committed to version control for reproducible environments.

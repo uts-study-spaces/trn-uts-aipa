@@ -1,0 +1,4 @@
+ticket_text
+"Subject: Duplicate invoice charged to account. Body: Our company subscription was charged twice for the same billing period. Please review the account and reverse the duplicate payment."
+"Subject: Dashboard unavailable for multiple users. Body: The reporting dashboard has been unavailable for the last hour and multiple users cannot view live case data."
+"Subject: Possible unauthorised access to admin portal. Body: Several staff received unexpected password reset emails and one admin account shows login attempts from an unknown location."

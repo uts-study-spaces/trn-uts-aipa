@@ -1,0 +1,29 @@
+{
+  "rows": 44275,
+  "dataset_files": [
+    "aa_dataset-tickets-multi-lang-5-2-50-version.csv",
+    "dataset-tickets-multi-lang-4-20k.csv",
+    "dataset-tickets-multi-lang3-4k.csv"
+  ],
+  "raw_rows_before_dedup": 52587,
+  "duplicate_rows_removed": 8309,
+  "text_column": "body",
+  "metadata_columns": [
+    "type",
+    "language",
+    "tag_1",
+    "tag_2",
+    "tag_3",
+    "tag_4",
+    "tag_5",
+    "tag_6",
+    "tag_7",
+    "tag_8",
+    "tag_9"
+  ],
+  "excluded_leakage_columns": [
+    "answer"
+  ],
+  "category_target": "queue",
+  "priority_target": "priority"
+}
