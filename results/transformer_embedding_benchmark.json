@@ -1,0 +1,10 @@
+{
+  "embedding_model": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+  "sample_size": 2500,
+  "random_state": 42,
+  "tasks": [
+    "category",
+    "priority"
+  ],
+  "note": "Optional sampled benchmark; compare cautiously against full-data TF-IDF results."
+}

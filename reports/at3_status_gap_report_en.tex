@@ -37,7 +37,7 @@ This report is designed to help the group quickly understand what is complete, w
   \item \textbf{Complete group details:} the updated presentation now includes Mario Rubiano, but it still shows \texttt{Student 6 ID 00000000}. Replace this placeholder in the slide deck and final report.
   \item \textbf{Prepare the demo:} train the models locally, launch Streamlit, test the Security Incident example, and keep screenshots as backup.
   \item \textbf{Finish the final report:} write the academic PDF of up to 3500 words with the GitHub link, references, metrics, limitations, and individual contributions.
-  \item \textbf{Avoid overclaiming:} describe LLMs, transformers, and GenAI as future work unless they are actually implemented.
+  \item \textbf{Avoid overclaiming:} describe LLMs and GenAI as future work. A small transformer-embedding benchmark now exists, but it is optional, sampled, and not part of the Streamlit app.
   \item \textbf{Fix or disclose technical limitations:} especially the mismatch between training with metadata and single-ticket inference using only text.
 \end{enumerate}
 
@@ -64,9 +64,9 @@ Real dataset and data governance & \done & Report + presentation & \textbf{Frame
 \addlinespace
 AI workflow and implementation & \done & Report + presentation & \textbf{Frame as evidence.} The repo includes notebooks 01--05, reusable modules in \texttt{src/customer\_support\_ai/}, model training, evaluation, report assets, and Streamlit. Use the workflow diagram in slides and describe the design decisions versus implementation details in the report. \\
 \addlinespace
-Multiple AI paradigms & \partialstatus & Mainly report; brief slide mention & \textbf{Frame as an improvement opportunity.} Implemented paradigms include supervised NLP, probabilistic Naive Bayes baseline, symbolic routing/escalation rules, explainability, and template summarisation. A stronger SLO4 component is not implemented, so LLMs/transformers should be described as future work unless added. \\
+Multiple AI paradigms & \partialstatus & Mainly report; brief slide mention & \textbf{Frame as partially strengthened.} Implemented paradigms include supervised NLP, probabilistic Naive Bayes baseline, symbolic routing/escalation rules, explainability, template summarisation, and an optional sampled multilingual transformer-embedding benchmark. For the presentation, mention this briefly as report evidence/time-permitting work; do not claim it replaces the app model. \\
 \addlinespace
-Theoretical justification & \partialstatus & Mainly report & \textbf{Frame as in progress.} The slides include references for TF-IDF, Linear SVM, explainability, and responsible AI. The final report should turn these into academic justification and compare trade-offs against alternatives such as transformer embeddings or LLM-based triage. \\
+Theoretical justification & \partialstatus & Mainly report & \textbf{Frame as in progress.} The slides include references for TF-IDF, Linear SVM, explainability, and responsible AI. The final report should turn these into academic justification and compare trade-offs against alternatives such as multilingual transformer embeddings or LLM-based triage. \\
 \addlinespace
 Empirical evaluation & \done & Report + presentation & \textbf{Frame as evidence.} Metrics, confusion matrices, per-class F1, and per-language F1 are available in \texttt{results/}. Use headline macro F1 values in slides; include tables, figures, interpretation, and limitations in the report. \\
 \addlinespace
@@ -103,6 +103,22 @@ Useful points for the final report:
   \item The language analysis shows a gap: English category macro F1 is 0.604, while German category macro F1 is 0.400.
 \end{itemize}
 
+\subsection*{Optional Transformer Benchmark}
+An optional sampled benchmark was added to compare the current sparse TF-IDF representation with dense multilingual transformer embeddings. It uses the multilingual MiniLM sentence-transformer model followed by Logistic Regression on a 2,500-ticket sample.
+
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+\textbf{Task} & \textbf{Sampled Accuracy} & \textbf{Sampled Macro F1} \\
+\midrule
+Queue/category & 0.272 & 0.235 \\
+Priority & 0.357 & 0.350 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+These sampled results do not outperform the current full-data TF-IDF + Linear SVM pipeline. The benchmark is still useful for AT3 because it provides a concrete semantic transformer-based comparison and supports a responsible conclusion: the deployed demo should remain with the more stable and explainable Linear SVM pipeline, while transformer embeddings can be discussed as future work requiring tuning, larger samples, and stronger validation.
+
 \section{Local Validation}
 The repository, application, brief, speaker script, and slide deck were reviewed. The notebooks were also executed locally.
 
@@ -124,7 +140,9 @@ Complete Student 6 details & 5 minutes & Removes a visible placeholder from the 
 Add backup screenshots & 15 minutes & Reduces risk if Streamlit fails during the presentation. \\
 Register the Jupyter kernel & 10 minutes & Improves reproducibility: \texttt{python -m ipykernel install --user --name customer-support-ai}. \\
 Add individual contributions & 20 minutes & Satisfies the individual assessment requirement. \\
-Add an ``implemented vs future work'' table & 20 minutes & Avoids overclaiming LLM/GenAI and demonstrates critical thinking. \\
+Add an ``implemented vs future work'' table & 20 minutes & Avoids overclaiming LLM/GenAI and demonstrates critical thinking. Include the optional transformer benchmark as implemented report evidence, and LLM/GenAI as future work. \\
+Mention transformer embeddings in the presentation & 10 minutes & Strengthens the SLO4 discussion. Recommended wording: ``We added an optional sampled transformer-embedding benchmark for the report, but the demo keeps Linear SVM because it is stronger and more explainable in our current results.'' \\
+Refine transformer benchmark if time allows & 2--4 hours & Optional for the final report. Try larger samples, class balancing, or Linear SVM on embeddings. Keep it out of the live app unless it clearly outperforms the current pipeline. \\
 Update README with exact demo command & 10 minutes & Helps every group member run the app reliably. \\
 Document train/inference limitation & 15 minutes & Shows technical honesty and prepares the team for Q\&A. \\
 Verify business references & 30 minutes & Prevents weak or inaccurate sources in the slides/report. \\
@@ -146,6 +164,13 @@ Training uses \texttt{model\_text}, which combines ticket text with safe metadat
 The app masks emails and phone numbers in summaries, but it does not cover every possible form of personally identifiable information.
 
 \textbf{Fast action:} describe this as basic privacy masking, not complete anonymisation.
+
+\subsection{Optional transformer benchmark}
+The optional transformer benchmark now exists, but it is sampled and currently performs below the full-data TF-IDF + Linear SVM results. This is not a failure; it is useful empirical evidence that a transformer representation is not automatically better without tuning, enough training data, and careful validation.
+
+\textbf{Presentation action:} mention it briefly as report evidence or future refinement, not as the main system.
+
+\textbf{Report action:} use it to strengthen the comparison of AI approaches: sparse lexical TF-IDF versus dense semantic multilingual embeddings. Explain that the production/demo choice remains Linear SVM because it currently offers better measured performance, lower complexity, and clearer explanation terms.
 
 \section{Recommended Closing Plan}
 \begin{enumerate}
