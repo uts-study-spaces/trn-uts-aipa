@@ -1,0 +1,3 @@
+task,model,split,accuracy,macro_precision,macro_recall,macro_f1,weighted_f1
+category,transformer_embeddings_logistic_regression,sampled_test,0.272,0.24923093530070278,0.2934902404187401,0.23478878100969033,0.2902976895852813
+priority,transformer_embeddings_logistic_regression,sampled_test,0.35733333333333334,0.3593369593369593,0.35907561556444034,0.34957423415977273,0.3641432483315238
