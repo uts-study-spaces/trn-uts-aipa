@@ -49,9 +49,11 @@ notebooks/02_cleaning_feature_engineering.ipynb
 notebooks/03_baseline_models.ipynb
 notebooks/04_experiments_and_pipeline.ipynb
 notebooks/05_final_evaluation_and_error_analysis.ipynb
+notebooks/06_transformer_embedding_benchmark.ipynb  optional, requires extra dependencies
 ```
 
 Notebook `04` regenerates model files and main results.
+Notebook `06` is optional and supports the final report discussion about transformer-based semantic representations.
 
 ## 4. Command-Line Training
 
@@ -86,3 +88,19 @@ This creates presentation/report charts in `report_assets/` and extra evaluation
 ```
 
 Use `docs/presentation_demo_examples.md` for stable demo inputs.
+
+## 7. Optional Transformer Benchmark
+
+Install the optional dependency:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements-transformer.txt
+```
+
+Run the sampled benchmark:
+
+```powershell
+.\.venv\Scripts\python.exe -m customer_support_ai.transformer_benchmark --sample-size 2500
+```
+
+This saves `results/transformer_embedding_benchmark.csv` and `results/transformer_embedding_benchmark.json`. Use it for report discussion, not for the live Streamlit demo.
