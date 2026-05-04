@@ -146,6 +146,9 @@ models/*
 *.hdf5
 *.h5
 *.parquet
+*.csv
+*.pptx
+*.ppt
 
 # Keep reusable report/evaluation outputs in version control.
 !data/raw/.gitkeep
