@@ -13,6 +13,12 @@ import streamlit.components.v1 as components
 from customer_support_ai.config import DATA_PROCESSED_DIR, MODELS_DIR, RESULTS_DIR
 from customer_support_ai.predict import analyse_ticket, load_model
 
+try:
+    from customer_support_ai.llm_agent import analyse_batch, create_chat_session, send_message
+    _AGENT_AVAILABLE = True
+except ImportError:
+    _AGENT_AVAILABLE = False
+
 GROUP_LABEL = "36121 Artificial Intelligence Principles and Applications - AT3 - Group 2"
 APP_TITLE = "Ticket Routing Intelligence"
 APP_SUBTITLE = "Explainable Multilingual Queue and Priority Prediction"
@@ -646,11 +652,13 @@ def solution_tab() -> None:
 
     render_label_space()
 
-    single_mode, batch_mode = st.tabs(["Single ticket", "Upload batch"])
+    single_mode, batch_mode, ai_mode = st.tabs(["Single ticket", "Upload batch", "AI Assistant"])
     with single_mode:
         render_single_ticket_form()
     with batch_mode:
         render_batch_upload_form()
+    with ai_mode:
+        ai_assistant_tab()
 
 
 def render_label_space() -> None:
@@ -830,6 +838,155 @@ def render_batch_upload_form() -> None:
                 mime="text/csv",
                 type="primary",
             )
+
+
+def ai_assistant_tab() -> None:
+    """Gemini-powered agent tab with unified chat and file upload interface."""
+    if not _AGENT_AVAILABLE:
+        st.error("google-genai is not installed. Run: pip install google-genai")
+        return
+
+    header_col, key_col = st.columns([0.65, 0.35])
+    with header_col:
+        st.markdown("### AI Triage Assistant")
+        st.caption(
+            "Type or paste a support ticket to analyse it. "
+            "To process a batch, click the **+** button on the left of the chat input to attach a CSV or Excel file. "
+            "The agent calls the trained ML models as tools and drafts a suggested reply."
+        )
+    with key_col:
+        st.markdown("<div style='margin-top:0.6rem'></div>", unsafe_allow_html=True)
+        submitted_key = st.text_input(
+            "Gemini API key",
+            type="password",
+            placeholder="Paste your API key here",
+            key="agent_api_key_input",
+        )
+        if st.button("Apply key", key="agent_apply_key"):
+            st.session_state["agent_api_key"] = submitted_key.strip()
+            st.session_state.pop("agent_chat", None)
+            st.rerun()
+
+    api_key = st.session_state.get("agent_api_key") or None
+
+    if "agent_chat" not in st.session_state:
+        try:
+            category_model, priority_model = load_models()
+            client, chat, tool_map = create_chat_session(category_model, priority_model, api_key=api_key)
+            st.session_state["agent_client"] = client
+            st.session_state["agent_chat"] = chat
+            st.session_state["agent_tool_map"] = tool_map
+            st.session_state["agent_messages"] = []
+        except FileNotFoundError:
+            st.error("Model files are missing. Train the models first with: python -m customer_support_ai.train")
+            return
+        except ValueError as exc:
+            st.warning(str(exc))
+            return
+
+    reset_col, _ = st.columns([0.22, 0.78])
+    with reset_col:
+        if st.button("Reset conversation", key="agent_reset"):
+            try:
+                category_model, priority_model = load_models()
+                client, chat, tool_map = create_chat_session(category_model, priority_model, api_key=api_key)
+                st.session_state["agent_client"] = client
+                st.session_state["agent_chat"] = chat
+                st.session_state["agent_tool_map"] = tool_map
+                st.session_state["agent_messages"] = []
+                st.session_state.pop("agent_batch_df", None)
+                st.rerun()
+            except (FileNotFoundError, ValueError):
+                pass
+
+    for message in st.session_state.get("agent_messages", []):
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
+            if message.get("batch") and "agent_batch_df" in st.session_state:
+                batch_df = st.session_state["agent_batch_df"]
+                if not batch_df.empty:
+                    render_dark_table(batch_df, max_rows=10)
+                    st.download_button(
+                        "Download predictions CSV",
+                        batch_df.to_csv(index=False).encode("utf-8"),
+                        file_name="agent_batch_predictions.csv",
+                        mime="text/csv",
+                    )
+
+    response = st.chat_input(
+        "Type a ticket here, or use + on the left to attach a CSV/Excel batch file...",
+        accept_file=True,
+        file_type=["csv", "xlsx", "xls"],
+    )
+
+    if response is None:
+        return
+
+    if response.files:
+        uploaded_file = response.files[0]
+        st.session_state["agent_messages"].append({"role": "user", "content": f"📎 {uploaded_file.name}"})
+
+        try:
+            uploaded_df = read_uploaded_table(uploaded_file)
+        except Exception as exc:
+            st.session_state["agent_messages"].append({"role": "assistant", "content": f"Could not read file: {exc}"})
+            st.rerun()
+            return
+
+        text_candidates = find_text_columns(uploaded_df)
+        if not text_candidates:
+            st.session_state["agent_messages"].append({
+                "role": "assistant",
+                "content": "No ticket text column found. Include a column named ticket_text, body, description, message, text, or subject.",
+            })
+            st.rerun()
+            return
+
+        lower_candidates = {str(c).strip().lower(): c for c in text_candidates}
+        text_column = next(
+            (
+                lower_candidates[n]
+                for n in ["ticket_text", "body", "description", "message", "text", "subject"]
+                if n in lower_candidates
+            ),
+            text_candidates[0],
+        )
+        tickets = uploaded_df.head(200)[text_column].fillna("").astype(str).tolist()
+
+        try:
+            category_model, priority_model = load_models()
+            with st.spinner(f"Analysing {len(tickets)} tickets..."):
+                batch_df, narrative = analyse_batch(tickets, category_model, priority_model, api_key=api_key)
+            st.session_state["agent_batch_df"] = batch_df
+            st.session_state["agent_messages"].append({
+                "role": "assistant",
+                "content": f"**Batch processed — {len(batch_df)} tickets analysed** (using column `{text_column}`).\n\n{narrative}",
+                "batch": True,
+            })
+        except Exception as exc:
+            st.session_state["agent_messages"].append({
+                "role": "assistant",
+                "content": f"Batch processing failed: {exc}",
+            })
+        st.rerun()
+
+    elif response.text and response.text.strip():
+        prompt = response.text.strip()
+        st.session_state["agent_messages"].append({"role": "user", "content": prompt})
+        try:
+            with st.spinner("Analysing..."):
+                reply = send_message(st.session_state["agent_chat"], st.session_state["agent_tool_map"], prompt)
+            st.session_state["agent_messages"].append({"role": "assistant", "content": reply})
+        except Exception as exc:
+            st.session_state["agent_messages"].append({
+                "role": "assistant",
+                "content": (
+                    "Sorry, an error was encountered while processing your request. "
+                    "Please try again, or use the **Single ticket** or **Upload batch** tabs instead.\n\n"
+                    f"_{exc}_"
+                ),
+            })
+        st.rerun()
 
 
 def main() -> None:
