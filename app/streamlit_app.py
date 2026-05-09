@@ -13,12 +13,15 @@ import streamlit.components.v1 as components
 from customer_support_ai.config import DATA_PROCESSED_DIR, MODELS_DIR, RESULTS_DIR
 from customer_support_ai.predict import analyse_ticket, load_model
 
+<<<<<<< HEAD
 try:
     from customer_support_ai.llm_agent import analyse_batch, create_chat_session, send_message, validate_api_key
     _AGENT_AVAILABLE = True
 except ImportError:
     _AGENT_AVAILABLE = False
 
+=======
+>>>>>>> 1fd79b5 (Add MLP classifier, RL routing agents)
 GROUP_LABEL = "36121 Artificial Intelligence Principles and Applications - AT3 - Group 2"
 APP_TITLE = "Ticket Routing Intelligence"
 APP_SUBTITLE = "Explainable Multilingual Queue and Priority Prediction"
@@ -121,7 +124,17 @@ def inject_style() -> None:
             border-radius: 8px;
             padding: 1.15rem;
             margin: 0.75rem 0;
+<<<<<<< HEAD
             box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+=======
+
+            height: 170px;              /*  force equal height */
+            display: flex;              /*  enable layout control */
+            flex-direction: column;
+            justify-content: space-between;
+
+            overflow-y: auto;           /* prevents overflow */
+>>>>>>> 1fd79b5 (Add MLP classifier, RL routing agents)
         }
         .mini-card-title {
             color: #f7fbff;
@@ -134,7 +147,11 @@ def inject_style() -> None:
         }
         .workflow-row {
             display: grid;
+<<<<<<< HEAD
             grid-template-columns: repeat(7, minmax(112px, 1fr));
+=======
+            grid-template-columns: repeat(8, minmax(112px, 1fr));
+>>>>>>> 1fd79b5 (Add MLP classifier, RL routing agents)
             gap: 0.65rem;
             margin: 0.9rem 0 1.2rem 0;
         }
@@ -180,6 +197,7 @@ def inject_style() -> None:
             overflow: visible !important;
             text-overflow: clip !important;
         }
+<<<<<<< HEAD
         .stTextArea label, .stSelectbox label, .stSlider label, .stFileUploader label, .stTextInput label {
             color: #f2f7fb !important;
             font-weight: 800;
@@ -190,12 +208,19 @@ def inject_style() -> None:
             border: 1px solid rgba(170, 211, 243, 0.55) !important;
             caret-color: #111827 !important;
         }
+=======
+        .stTextArea label, .stSelectbox label, .stSlider label, .stFileUploader label {
+            color: #f2f7fb !important;
+            font-weight: 800;
+        }
+>>>>>>> 1fd79b5 (Add MLP classifier, RL routing agents)
         .stTextArea textarea {
             background: #f8fafc !important;
             color: #111827 !important;
             border: 1px solid rgba(170, 211, 243, 0.55) !important;
             caret-color: #111827 !important;
         }
+<<<<<<< HEAD
         div[data-testid="stChatMessage"] p,
         div[data-testid="stChatMessage"] li,
         div[data-testid="stChatMessage"] span {
@@ -204,6 +229,8 @@ def inject_style() -> None:
         .st-key-agent_api_key_input [data-testid="InputInstructions"] {
             display: none !important;
         }
+=======
+>>>>>>> 1fd79b5 (Add MLP classifier, RL routing agents)
         .stTextArea textarea::placeholder {
             color: #64748b !important;
         }
@@ -287,7 +314,11 @@ def inject_style() -> None:
         }
         div[data-testid="stVerticalBlockBorderWrapper"] {
             background: rgba(255, 255, 255, 0.075);
+<<<<<<< HEAD
             border: 1px solid rgba(94, 234, 212, 0.4);
+=======
+            border: 1px solid rgba(255, 255, 255, 0.16);
+>>>>>>> 1fd79b5 (Add MLP classifier, RL routing agents)
             border-radius: 8px;
             box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16);
             padding: 0.7rem;
@@ -345,6 +376,7 @@ def inject_style() -> None:
             padding: 0.65rem 0.7rem;
             border-bottom: 1px solid rgba(170, 211, 243, 0.10);
         }
+<<<<<<< HEAD
         div[data-testid="stVerticalBlockBorderWrapper"] ::-webkit-scrollbar {
             width: 7px;
         }
@@ -359,6 +391,8 @@ def inject_style() -> None:
         div[data-testid="stVerticalBlockBorderWrapper"] ::-webkit-scrollbar-thumb:hover {
             background: rgba(94, 234, 212, 0.85);
         }
+=======
+>>>>>>> 1fd79b5 (Add MLP classifier, RL routing agents)
         </style>
         """,
         unsafe_allow_html=True,
@@ -419,7 +453,12 @@ def load_models():
 
 
 def load_metrics() -> pd.DataFrame:
+<<<<<<< HEAD
     metrics_path = RESULTS_DIR / "metrics_summary.csv"
+=======
+    from pathlib import Path
+    metrics_path = Path(__file__).parent.parent / "results" / "metrics_summary.csv"
+>>>>>>> 1fd79b5 (Add MLP classifier, RL routing agents)
     return pd.read_csv(metrics_path) if metrics_path.exists() else pd.DataFrame()
 
 
@@ -498,7 +537,11 @@ def bar_chart(
         return
 
     encoding = {
+<<<<<<< HEAD
         "x": alt.X(f"{x}:N", sort=sort, axis=alt.Axis(labelAngle=-30)),
+=======
+        "x": alt.X(f"{x}:N", sort=sort, axis=alt.Axis(labelAngle=-45, labelLimit=200)),
+>>>>>>> 1fd79b5 (Add MLP classifier, RL routing agents)
         "y": alt.Y(f"{y}:Q"),
         "tooltip": list(data.columns),
     }
@@ -516,6 +559,7 @@ def bar_chart(
     st.altair_chart(chart_theme(chart), use_container_width=True)
 
 
+<<<<<<< HEAD
 def chart_card(title: str, data: pd.DataFrame, x: str, y: str, color: str | None = None, height: int = 300) -> None:
     """Render a chart inside a bordered dashboard panel."""
     with st.container(border=True):
@@ -523,12 +567,64 @@ def chart_card(title: str, data: pd.DataFrame, x: str, y: str, color: str | None
         bar_chart(data, x, y, title="", color=color, height=height)
 
 
+=======
+def chart_card(title: str, data: pd.DataFrame, x: str, y: str, color: str | None = None, height: int = 300, sort: str | list | None = "-y") -> None:
+    with st.container(border=True):
+        st.markdown(f"<div class='chart-title'>{title}</div>", unsafe_allow_html=True)
+        bar_chart(data, x, y, title="", color=color, height=height, sort=sort)
+
+
+import re
+
+STOP_TERMS = {
+    "my", "with", "the", "and", "to", "for", "of", "in", "on",
+    "a", "an", "is", "are", "was", "were", "i", "we", "our",
+    "your", "please", "issue", "problem", "help"
+}
+#Aad strong cleaning fucntion 
+def clean_explanation_terms(terms, max_terms=5):
+    clean = []
+    seen_words = set()
+
+    for term, score in terms:
+        term = str(term).lower().strip()
+
+        # remove symbols
+        term = re.sub(r'[^a-zA-Z ]', '', term)
+
+        if not term:
+            continue
+
+        words = term.split()
+
+        # remove terms that are mostly stopwords
+        if all(w in STOP_TERMS for w in words):
+            continue
+
+        # remove duplicates based on root word
+        root = words[-1]  # keep main keyword (e.g. "payment")
+        if root in seen_words:
+            continue
+
+        seen_words.add(root)
+        clean.append(term)
+
+        if len(clean) >= max_terms:
+            break
+
+    return clean
+
+>>>>>>> 1fd79b5 (Add MLP classifier, RL routing agents)
 def render_result(result: dict) -> None:
     result_items = [
         ("Predicted queue", result["category"]),
         ("Predicted priority", result["priority"]),
         ("Recommended team", result["recommended_team"]),
+<<<<<<< HEAD
         ("Escalation", "Required" if result["escalation_required"] else "Not required"),
+=======
+        ("Escalation", "High risk — review required" if result["escalation_required"] else "Low risk — no escalation"),
+>>>>>>> 1fd79b5 (Add MLP classifier, RL routing agents)
     ]
     columns = st.columns(4)
     for column, (label, value) in zip(columns, result_items):
@@ -545,12 +641,23 @@ def render_result(result: dict) -> None:
 
     col1, col2 = st.columns([1.05, 0.95])
     with col1:
+<<<<<<< HEAD
         st.markdown("#### Summary")
         st.markdown(f"<div class='section-card'>{result['summary']}</div>", unsafe_allow_html=True)
     with col2:
         st.markdown("#### Explanation Terms")
         category_terms = ", ".join(term for term, _ in result["category_explanation_terms"]) or "No terms available"
         priority_terms = ", ".join(term for term, _ in result["priority_explanation_terms"]) or "No terms available"
+=======
+        st.markdown("#### Ticket Summary")
+        st.markdown(f"<div class='section-card'>{result['summary']}</div>", unsafe_allow_html=True)
+    with col2:
+        st.markdown("#### Explanation Terms")
+        category_terms_list = clean_explanation_terms(result["category_explanation_terms"])
+        priority_terms_list = clean_explanation_terms(result["priority_explanation_terms"])
+        category_terms = ", ".join(category_terms_list) or "No meaningful terms available"
+        priority_terms = ", ".join(priority_terms_list) or "No meaningful terms available"
+>>>>>>> 1fd79b5 (Add MLP classifier, RL routing agents)
         st.markdown(
             f"""
             <div class="section-card">
@@ -561,7 +668,10 @@ def render_result(result: dict) -> None:
             unsafe_allow_html=True,
         )
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 1fd79b5 (Add MLP classifier, RL routing agents)
 def render_workflow() -> None:
     """Render a one-line project workflow."""
     st.markdown(
@@ -570,10 +680,18 @@ def render_workflow() -> None:
             <div class="workflow-step"><div class="workflow-icon">📁</div><div class="workflow-title">Audit Data</div><div class="workflow-copy">Inspect all 5 Kaggle CSV files.</div></div>
             <div class="workflow-step"><div class="workflow-icon">🧹</div><div class="workflow-title">Prepare Text</div><div class="workflow-copy">Merge, deduplicate, clean, and mask text.</div></div>
             <div class="workflow-step"><div class="workflow-icon">🔎</div><div class="workflow-title">Build Features</div><div class="workflow-copy">TF-IDF text plus safe metadata tokens.</div></div>
+<<<<<<< HEAD
             <div class="workflow-step"><div class="workflow-icon">🧠</div><div class="workflow-title">Train Models</div><div class="workflow-copy">Compare baseline NLP classifiers.</div></div>
             <div class="workflow-step"><div class="workflow-icon">📊</div><div class="workflow-title">Evaluate</div><div class="workflow-copy">Macro F1, confusion matrices, language checks.</div></div>
             <div class="workflow-step"><div class="workflow-icon">🧭</div><div class="workflow-title">Route</div><div class="workflow-copy">Recommend team and escalation review.</div></div>
             <div class="workflow-step"><div class="workflow-icon">💬</div><div class="workflow-title">Explain</div><div class="workflow-copy">Show summaries and influential terms.</div></div>
+=======
+            <div class="workflow-step"><div class="workflow-icon">🧠</div><div class="workflow-title">Train Models</div><div class="workflow-copy">Compare LR, SVM, Naive Bayes, and MLP neural network.</div></div>
+            <div class="workflow-step"><div class="workflow-icon">📊</div><div class="workflow-title">Evaluate</div><div class="workflow-copy">Macro F1, confusion matrices, language checks.</div></div>
+            <div class="workflow-step"><div class="workflow-icon">🧭</div><div class="workflow-title">Route</div><div class="workflow-copy">Recommend team and escalation review.</div></div>
+            <div class="workflow-step"><div class="workflow-icon">💬</div><div class="workflow-title">Explain</div><div class="workflow-copy">Show summaries and influential terms.</div></div>
+            <div class="workflow-step"><div class="workflow-icon">🤖</div><div class="workflow-title">RL Route</div><div class="workflow-copy">Q-learning agent learns optimal routing policy.</div></div>
+>>>>>>> 1fd79b5 (Add MLP classifier, RL routing agents)
         </div>
         """,
         unsafe_allow_html=True,
@@ -593,6 +711,11 @@ def overview_tab(profile: dict, metrics: pd.DataFrame) -> None:
             <span class="pill">Routing rules</span>
             <span class="pill">Escalation support</span>
             <span class="pill">Explainable AI</span>
+<<<<<<< HEAD
+=======
+            <span class="pill">Neural Network (MLP)</span>
+            <span class="pill">Reinforcement Learning</span>
+>>>>>>> 1fd79b5 (Add MLP classifier, RL routing agents)
             <br><br>
             <p>
                 A decision-support system for first-pass customer support triage: predict the queue,
@@ -610,12 +733,21 @@ def overview_tab(profile: dict, metrics: pd.DataFrame) -> None:
     best_macro = test_rows["macro_f1"].max() if not test_rows.empty else 0
 
     st.write("")
+<<<<<<< HEAD
     c1, c2, c3, c4, c5 = st.columns(5)
+=======
+    c1, c2, c3, c4 = st.columns(4)
+>>>>>>> 1fd79b5 (Add MLP classifier, RL routing agents)
     c1.metric("Usable tickets", f"{rows:,}")
     c2.metric("Compatible CSVs", files_used)
     c3.metric("Duplicates removed", f"{duplicates:,}")
     c4.metric("Best test macro F1", f"{best_macro:.3f}" if best_macro else "N/A")
+<<<<<<< HEAD
     c5.metric("Vectorizer", profile.get("vectorizer_type", "tfidf").upper())
+=======
+    
+    
+>>>>>>> 1fd79b5 (Add MLP classifier, RL routing agents)
 
     st.markdown("### AI Workflow")
     render_workflow()
@@ -639,7 +771,10 @@ def overview_tab(profile: dict, metrics: pd.DataFrame) -> None:
     frame = load_model_ready_data()
     per_language = load_optional_csv("per_language_metrics.csv")
     per_class = load_optional_csv("per_class_f1.csv")
+<<<<<<< HEAD
     transformer_benchmark = load_optional_csv("transformer_embedding_benchmark.csv")
+=======
+>>>>>>> 1fd79b5 (Add MLP classifier, RL routing agents)
 
     left, right = st.columns(2)
     with left:
@@ -652,12 +787,43 @@ def overview_tab(profile: dict, metrics: pd.DataFrame) -> None:
             chart_card("Priority Distribution", priority_counts, "priority", "tickets", height=280)
 
     left, right = st.columns(2)
+<<<<<<< HEAD
     with left:
         chart_sources = [data for data in [metrics, transformer_benchmark] if not data.empty]
         if chart_sources:
             chart_data = pd.concat(chart_sources, ignore_index=True)
             chart_data = chart_data.assign(label=chart_data["task"] + " | " + chart_data["model"] + " | " + chart_data["split"])
             chart_card("Model Comparison by Macro F1", chart_data, "label", "macro_f1", color="task", height=330)
+=======
+    
+    with left:
+        if not metrics.empty:
+            # Explicitly pick best row per task+model combination
+            rows = []
+            for (task, model), group in metrics.groupby(["task", "model"]):
+                best_row = group.loc[group["macro_f1"].idxmax()]
+                rows.append(best_row)
+            best_per_model = pd.DataFrame(rows).sort_values("macro_f1", ascending=False).reset_index(drop=True)
+            
+            best_per_model["label"] = best_per_model["model"] + " | " + best_per_model["task"]
+            label_order = best_per_model["label"].tolist()
+            with st.container(border=True):
+                st.markdown("<div class='chart-title'>Model Comparison by Macro F1</div>", unsafe_allow_html=True)
+                encoding = {
+                    "x": alt.X("label:N", sort=label_order, axis=alt.Axis(labelAngle=-45, labelLimit=200)),
+                    "y": alt.Y("macro_f1:Q"),
+                    "color": alt.Color("task:N", scale=alt.Scale(scheme="set2")),
+                    "tooltip": ["model", "task", "macro_f1", "split"],
+                }
+                chart = alt.Chart(best_per_model).mark_bar(
+                    cornerRadiusTopLeft=5,
+                    cornerRadiusTopRight=5,
+                    opacity=0.92,
+                ).encode(**encoding).properties(height=380, width=alt.Step(80))
+                st.altair_chart(chart_theme(chart))
+    
+    
+>>>>>>> 1fd79b5 (Add MLP classifier, RL routing agents)
     with right:
         if not per_language.empty:
             chart_card("Macro F1 by Language", per_language, "language", "macro_f1", color="task", height=330)
@@ -665,14 +831,21 @@ def overview_tab(profile: dict, metrics: pd.DataFrame) -> None:
     with st.expander("Detailed Report Tables"):
         table_choice = st.radio(
             "Detailed table choice",
+<<<<<<< HEAD
             ["Final test metrics", "Transformer benchmark", "Per-language metrics", "Per-class F1"],
+=======
+            ["Final test metrics", "Per-language metrics", "Per-class F1"],
+>>>>>>> 1fd79b5 (Add MLP classifier, RL routing agents)
             horizontal=True,
             label_visibility="collapsed",
         )
         if table_choice == "Final test metrics":
             render_dark_table(metrics[metrics["split"] == "test"] if not metrics.empty else pd.DataFrame())
+<<<<<<< HEAD
         elif table_choice == "Transformer benchmark":
             render_dark_table(transformer_benchmark)
+=======
+>>>>>>> 1fd79b5 (Add MLP classifier, RL routing agents)
         elif table_choice == "Per-language metrics":
             render_dark_table(per_language)
         else:
@@ -686,13 +859,20 @@ def solution_tab() -> None:
 
     render_label_space()
 
+<<<<<<< HEAD
     single_mode, batch_mode, ai_mode = st.tabs(["Single ticket", "Upload batch", "AI Assistant"])
+=======
+    single_mode, batch_mode = st.tabs(["Single ticket", "Upload batch"])
+>>>>>>> 1fd79b5 (Add MLP classifier, RL routing agents)
     with single_mode:
         render_single_ticket_form()
     with batch_mode:
         render_batch_upload_form()
+<<<<<<< HEAD
     with ai_mode:
         ai_assistant_tab()
+=======
+>>>>>>> 1fd79b5 (Add MLP classifier, RL routing agents)
 
 
 def render_label_space() -> None:
@@ -874,6 +1054,7 @@ def render_batch_upload_form() -> None:
             )
 
 
+<<<<<<< HEAD
 def ai_assistant_tab() -> None:
     """Gemini-powered agent tab with unified chat and file upload interface."""
     if not _AGENT_AVAILABLE:
@@ -1106,6 +1287,8 @@ def ai_assistant_tab() -> None:
         st.rerun()
 
 
+=======
+>>>>>>> 1fd79b5 (Add MLP classifier, RL routing agents)
 def main() -> None:
     inject_style()
     suppress_streamlit_copy_hotkey()

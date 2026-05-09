@@ -10,6 +10,9 @@ python-dotenv>=1.2.2
 scikit-learn>=1.4
 seaborn>=0.13.2
 streamlit>=1.36
+<<<<<<< HEAD
 google-genai>=1.0
 gensim>=4.3.0
 top2vec>=1.0.34
+=======
+>>>>>>> 1fd79b5 (Add MLP classifier, RL routing agents)

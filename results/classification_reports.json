@@ -1,6 +1,7 @@
 {
   "category_logistic_regression_validation": {
     "Billing and Payments": {
+<<<<<<< HEAD
       "precision": 0.7098214285714286,
       "recall": 0.7282442748091603,
       "f1-score": 0.718914845516202,
@@ -71,6 +72,78 @@
       "precision": 0.4607755150569535,
       "recall": 0.4290876242095754,
       "f1-score": 0.4342626467929846,
+=======
+      "precision": 0.7102941176470589,
+      "recall": 0.7374045801526717,
+      "f1-score": 0.7235955056179775,
+      "support": 655.0
+    },
+    "Customer Service": {
+      "precision": 0.37018255578093306,
+      "recall": 0.361028684470821,
+      "f1-score": 0.3655483224837256,
+      "support": 1011.0
+    },
+    "General Inquiry": {
+      "precision": 0.18181818181818182,
+      "recall": 0.43478260869565216,
+      "f1-score": 0.2564102564102564,
+      "support": 92.0
+    },
+    "Human Resources": {
+      "precision": 0.3,
+      "recall": 0.525,
+      "f1-score": 0.38181818181818183,
+      "support": 120.0
+    },
+    "IT Support": {
+      "precision": 0.3233601841196778,
+      "recall": 0.3575063613231552,
+      "f1-score": 0.3395770392749245,
+      "support": 786.0
+    },
+    "Product Support": {
+      "precision": 0.42546245919477693,
+      "recall": 0.32128184059161874,
+      "f1-score": 0.3661048689138577,
+      "support": 1217.0
+    },
+    "Returns and Exchanges": {
+      "precision": 0.291015625,
+      "recall": 0.4501510574018127,
+      "f1-score": 0.3534994068801898,
+      "support": 331.0
+    },
+    "Sales and Pre-Sales": {
+      "precision": 0.2388758782201405,
+      "recall": 0.4880382775119617,
+      "f1-score": 0.32075471698113206,
+      "support": 209.0
+    },
+    "Service Outages and Maintenance": {
+      "precision": 0.3954022988505747,
+      "recall": 0.671875,
+      "f1-score": 0.49782923299565845,
+      "support": 256.0
+    },
+    "Technical Support": {
+      "precision": 0.5845375722543352,
+      "recall": 0.411704834605598,
+      "f1-score": 0.4831292923260675,
+      "support": 1965.0
+    },
+    "accuracy": 0.42984040951520625,
+    "macro avg": {
+      "precision": 0.3820948872885679,
+      "recall": 0.4758773244753291,
+      "f1-score": 0.40882668237019715,
+      "support": 6642.0
+    },
+    "weighted avg": {
+      "precision": 0.46074434652924645,
+      "recall": 0.42984040951520625,
+      "f1-score": 0.4345421404021399,
+>>>>>>> 1fd79b5 (Add MLP classifier, RL routing agents)
       "support": 6642.0
     }
   },
@@ -82,6 +155,7 @@
       "support": 655.0
     },
     "Customer Service": {
+<<<<<<< HEAD
       "precision": 0.4468690702087287,
       "recall": 0.4658753709198813,
       "f1-score": 0.45617433414043584,
@@ -146,11 +220,78 @@
       "precision": 0.5197815663810051,
       "recall": 0.5150557061126166,
       "f1-score": 0.5154166902149239,
+=======
+      "precision": 0.4492890995260663,
+      "recall": 0.4688427299703264,
+      "f1-score": 0.45885769603097776,
+      "support": 1011.0
+    },
+    "General Inquiry": {
+      "precision": 0.3592233009708738,
+      "recall": 0.40217391304347827,
+      "f1-score": 0.37948717948717947,
+      "support": 92.0
+    },
+    "Human Resources": {
+      "precision": 0.4789915966386555,
+      "recall": 0.475,
+      "f1-score": 0.4769874476987448,
+      "support": 120.0
+    },
+    "IT Support": {
+      "precision": 0.4157303370786517,
+      "recall": 0.42366412213740456,
+      "f1-score": 0.41965973534971646,
+      "support": 786.0
+    },
+    "Product Support": {
+      "precision": 0.4670874661857529,
+      "recall": 0.4256368118323747,
+      "f1-score": 0.4453998280309544,
+      "support": 1217.0
+    },
+    "Returns and Exchanges": {
+      "precision": 0.3922902494331066,
+      "recall": 0.5226586102719033,
+      "f1-score": 0.4481865284974093,
+      "support": 331.0
+    },
+    "Sales and Pre-Sales": {
+      "precision": 0.3582089552238806,
+      "recall": 0.45933014354066987,
+      "f1-score": 0.4025157232704403,
+      "support": 209.0
+    },
+    "Service Outages and Maintenance": {
+      "precision": 0.5292207792207793,
+      "recall": 0.63671875,
+      "f1-score": 0.5780141843971631,
+      "support": 256.0
+    },
+    "Technical Support": {
+      "precision": 0.6065192083818394,
+      "recall": 0.5302798982188295,
+      "f1-score": 0.5658430627206082,
+      "support": 1965.0
+    },
+    "accuracy": 0.5149051490514905,
+    "macro avg": {
+      "precision": 0.47885054371040503,
+      "recall": 0.5148885131686741,
+      "f1-score": 0.49414968400286485,
+      "support": 6642.0
+    },
+    "weighted avg": {
+      "precision": 0.5196321025993358,
+      "recall": 0.5149051490514905,
+      "f1-score": 0.5152629685181638,
+>>>>>>> 1fd79b5 (Add MLP classifier, RL routing agents)
       "support": 6642.0
     }
   },
   "category_naive_bayes_validation": {
     "Billing and Payments": {
+<<<<<<< HEAD
       "precision": 0.9187192118226601,
       "recall": 0.5694656488549619,
       "f1-score": 0.70311027332705,
@@ -160,6 +301,17 @@
       "precision": 0.25685506435366534,
       "recall": 0.4540059347181009,
       "f1-score": 0.3280914939242316,
+=======
+      "precision": 0.9207920792079208,
+      "recall": 0.5679389312977099,
+      "f1-score": 0.7025495750708215,
+      "support": 655.0
+    },
+    "Customer Service": {
+      "precision": 0.2568397543271915,
+      "recall": 0.4549950544015826,
+      "f1-score": 0.32833690221270523,
+>>>>>>> 1fd79b5 (Add MLP classifier, RL routing agents)
       "support": 1011.0
     },
     "General Inquiry": {
@@ -175,6 +327,7 @@
       "support": 120.0
     },
     "IT Support": {
+<<<<<<< HEAD
       "precision": 0.3076923076923077,
       "recall": 0.010178117048346057,
       "f1-score": 0.019704433497536946,
@@ -184,6 +337,17 @@
       "precision": 0.3384615384615385,
       "recall": 0.1988496302382909,
       "f1-score": 0.2505175983436853,
+=======
+      "precision": 0.375,
+      "recall": 0.011450381679389313,
+      "f1-score": 0.022222222222222223,
+      "support": 786.0
+    },
+    "Product Support": {
+      "precision": 0.34221598877980364,
+      "recall": 0.20049301561216104,
+      "f1-score": 0.2528497409326425,
+>>>>>>> 1fd79b5 (Add MLP classifier, RL routing agents)
       "support": 1217.0
     },
     "Returns and Exchanges": {
@@ -199,6 +363,7 @@
       "support": 209.0
     },
     "Service Outages and Maintenance": {
+<<<<<<< HEAD
       "precision": 0.6428571428571429,
       "recall": 0.03515625,
       "f1-score": 0.06666666666666667,
@@ -221,11 +386,111 @@
       "precision": 0.46421752566690444,
       "recall": 0.39174947305028607,
       "f1-score": 0.331944358148153,
+=======
+      "precision": 0.6,
+      "recall": 0.03515625,
+      "f1-score": 0.06642066420664207,
+      "support": 256.0
+    },
+    "Technical Support": {
+      "precision": 0.4066412629286881,
+      "recall": 0.7603053435114504,
+      "f1-score": 0.5298811846071999,
+      "support": 1965.0
+    },
+    "accuracy": 0.39235170129479074,
+    "macro avg": {
+      "precision": 0.5734822418576937,
+      "recall": 0.20935589083698636,
+      "f1-score": 0.20237064462304516,
+      "support": 6642.0
+    },
+    "weighted avg": {
+      "precision": 0.4714685451429095,
+      "recall": 0.39235170129479074,
+      "f1-score": 0.33271934318362667,
+      "support": 6642.0
+    }
+  },
+  "category_mlp_validation": {
+    "Billing and Payments": {
+      "precision": 0.7801652892561983,
+      "recall": 0.7206106870229008,
+      "f1-score": 0.7492063492063492,
+      "support": 655.0
+    },
+    "Customer Service": {
+      "precision": 0.4389051808406647,
+      "recall": 0.44411473788328387,
+      "f1-score": 0.4414945919370698,
+      "support": 1011.0
+    },
+    "General Inquiry": {
+      "precision": 0.3333333333333333,
+      "recall": 0.22826086956521738,
+      "f1-score": 0.2709677419354839,
+      "support": 92.0
+    },
+    "Human Resources": {
+      "precision": 0.5172413793103449,
+      "recall": 0.375,
+      "f1-score": 0.43478260869565216,
+      "support": 120.0
+    },
+    "IT Support": {
+      "precision": 0.42555994729907776,
+      "recall": 0.410941475826972,
+      "f1-score": 0.4181229773462783,
+      "support": 786.0
+    },
+    "Product Support": {
+      "precision": 0.4280245022970903,
+      "recall": 0.45932621199671325,
+      "f1-score": 0.44312326595323026,
+      "support": 1217.0
+    },
+    "Returns and Exchanges": {
+      "precision": 0.46825396825396826,
+      "recall": 0.3564954682779456,
+      "f1-score": 0.40480274442538594,
+      "support": 331.0
+    },
+    "Sales and Pre-Sales": {
+      "precision": 0.3349282296650718,
+      "recall": 0.3349282296650718,
+      "f1-score": 0.3349282296650718,
+      "support": 209.0
+    },
+    "Service Outages and Maintenance": {
+      "precision": 0.49429657794676807,
+      "recall": 0.5078125,
+      "f1-score": 0.5009633911368016,
+      "support": 256.0
+    },
+    "Technical Support": {
+      "precision": 0.5566265060240964,
+      "recall": 0.5877862595419847,
+      "f1-score": 0.5717821782178217,
+      "support": 1965.0
+    },
+    "accuracy": 0.5031616982836495,
+    "macro avg": {
+      "precision": 0.4777334914226613,
+      "recall": 0.442527643978009,
+      "f1-score": 0.45701740785191447,
+      "support": 6642.0
+    },
+    "weighted avg": {
+      "precision": 0.504091545337707,
+      "recall": 0.5031616982836495,
+      "f1-score": 0.5025441325012313,
+>>>>>>> 1fd79b5 (Add MLP classifier, RL routing agents)
       "support": 6642.0
     }
   },
   "category_linear_svm_test": {
     "Billing and Payments": {
+<<<<<<< HEAD
       "precision": 0.7557471264367817,
       "recall": 0.8030534351145038,
       "f1-score": 0.7786824574389342,
@@ -241,6 +506,23 @@
       "precision": 0.47,
       "recall": 0.5108695652173914,
       "f1-score": 0.4895833333333333,
+=======
+      "precision": 0.7568345323741007,
+      "recall": 0.8030534351145038,
+      "f1-score": 0.7792592592592592,
+      "support": 655.0
+    },
+    "Customer Service": {
+      "precision": 0.4549950544015826,
+      "recall": 0.4549950544015826,
+      "f1-score": 0.4549950544015826,
+      "support": 1011.0
+    },
+    "General Inquiry": {
+      "precision": 0.47474747474747475,
+      "recall": 0.5108695652173914,
+      "f1-score": 0.49214659685863876,
+>>>>>>> 1fd79b5 (Add MLP classifier, RL routing agents)
       "support": 92.0
     },
     "Human Resources": {
@@ -250,6 +532,7 @@
       "support": 120.0
     },
     "IT Support": {
+<<<<<<< HEAD
       "precision": 0.4496732026143791,
       "recall": 0.43765903307888043,
       "f1-score": 0.4435847840103159,
@@ -296,11 +579,60 @@
       "precision": 0.53365801569047,
       "recall": 0.5313158687142427,
       "f1-score": 0.5311633049834433,
+=======
+      "precision": 0.4480946123521682,
+      "recall": 0.43384223918575066,
+      "f1-score": 0.44085326438267614,
+      "support": 786.0
+    },
+    "Product Support": {
+      "precision": 0.4837291116974494,
+      "recall": 0.4519309778142975,
+      "f1-score": 0.4672897196261682,
+      "support": 1217.0
+    },
+    "Returns and Exchanges": {
+      "precision": 0.3740831295843521,
+      "recall": 0.4622356495468278,
+      "f1-score": 0.4135135135135135,
+      "support": 331.0
+    },
+    "Sales and Pre-Sales": {
+      "precision": 0.4306049822064057,
+      "recall": 0.5789473684210527,
+      "f1-score": 0.49387755102040815,
+      "support": 209.0
+    },
+    "Service Outages and Maintenance": {
+      "precision": 0.5659163987138264,
+      "recall": 0.6848249027237354,
+      "f1-score": 0.6197183098591549,
+      "support": 257.0
+    },
+    "Technical Support": {
+      "precision": 0.6052048726467331,
+      "recall": 0.5565173116089613,
+      "f1-score": 0.579840848806366,
+      "support": 1964.0
+    },
+    "accuracy": 0.5316169828364951,
+    "macro avg": {
+      "precision": 0.5079058653572578,
+      "recall": 0.5470549837367437,
+      "f1-score": 0.5249430625664274,
+      "support": 6642.0
+    },
+    "weighted avg": {
+      "precision": 0.5339305540995812,
+      "recall": 0.5316169828364951,
+      "f1-score": 0.5314687369909311,
+>>>>>>> 1fd79b5 (Add MLP classifier, RL routing agents)
       "support": 6642.0
     }
   },
   "priority_logistic_regression_validation": {
     "high": {
+<<<<<<< HEAD
       "precision": 0.6196343402225755,
       "recall": 0.5986943164362519,
       "f1-score": 0.608984375,
@@ -329,11 +661,42 @@
       "precision": 0.5524853206710142,
       "recall": 0.5403492923818127,
       "f1-score": 0.543623962615995,
+=======
+      "precision": 0.6129289704708699,
+      "recall": 0.5898617511520737,
+      "f1-score": 0.601174168297456,
+      "support": 2604.0
+    },
+    "low": {
+      "precision": 0.38863892013498313,
+      "recall": 0.5141369047619048,
+      "f1-score": 0.4426649583600256,
+      "support": 1344.0
+    },
+    "medium": {
+      "precision": 0.5640373197625106,
+      "recall": 0.49368968077208614,
+      "f1-score": 0.5265241488519399,
+      "support": 2694.0
+    },
+    "accuracy": 0.5355314664257753,
+    "macro avg": {
+      "precision": 0.5218684034561213,
+      "recall": 0.5325627788953549,
+      "f1-score": 0.5234544251698071,
+      "support": 6642.0
+    },
+    "weighted avg": {
+      "precision": 0.5477136837108952,
+      "recall": 0.5355314664257753,
+      "f1-score": 0.5388219354546185,
+>>>>>>> 1fd79b5 (Add MLP classifier, RL routing agents)
       "support": 6642.0
     }
   },
   "priority_linear_svm_validation": {
     "high": {
+<<<<<<< HEAD
       "precision": 0.6229007633587786,
       "recall": 0.6267281105990783,
       "f1-score": 0.6248085758039816,
@@ -362,11 +725,42 @@
       "precision": 0.5671924584355629,
       "recall": 0.5663956639566395,
       "f1-score": 0.5667450401272147,
+=======
+      "precision": 0.6231386025200458,
+      "recall": 0.6267281105990783,
+      "f1-score": 0.6249282021826537,
+      "support": 2604.0
+    },
+    "low": {
+      "precision": 0.4339350180505415,
+      "recall": 0.44717261904761907,
+      "f1-score": 0.4404543788933675,
+      "support": 1344.0
+    },
+    "medium": {
+      "precision": 0.5799848369977255,
+      "recall": 0.5679287305122495,
+      "f1-score": 0.5738934733683421,
+      "support": 2694.0
+    },
+    "accuracy": 0.5665462210177657,
+    "macro avg": {
+      "precision": 0.5456861525227709,
+      "recall": 0.547276486719649,
+      "f1-score": 0.5464253514814544,
+      "support": 6642.0
+    },
+    "weighted avg": {
+      "precision": 0.5673503065483286,
+      "recall": 0.5665462210177657,
+      "f1-score": 0.5669004427838948,
+>>>>>>> 1fd79b5 (Add MLP classifier, RL routing agents)
       "support": 6642.0
     }
   },
   "priority_naive_bayes_validation": {
     "high": {
+<<<<<<< HEAD
       "precision": 0.5234321157822192,
       "recall": 0.5833333333333334,
       "f1-score": 0.55176171449328,
@@ -428,6 +822,102 @@
       "precision": 0.581052259787892,
       "recall": 0.5802469135802468,
       "f1-score": 0.5805840414746773,
+=======
+      "precision": 0.5234159779614325,
+      "recall": 0.5837173579109063,
+      "f1-score": 0.5519244734931009,
+      "support": 2604.0
+    },
+    "low": {
+      "precision": 0.46956521739130436,
+      "recall": 0.04017857142857143,
+      "f1-score": 0.07402330363262509,
+      "support": 1344.0
+    },
+    "medium": {
+      "precision": 0.47032845707976817,
+      "recall": 0.6325167037861915,
+      "f1-score": 0.5394965964856736,
+      "support": 2694.0
+    },
+    "accuracy": 0.4935260463715748,
+    "macro avg": {
+      "precision": 0.4877698841441683,
+      "recall": 0.41880421104188975,
+      "f1-score": 0.3884814578704665,
+      "support": 6642.0
+    },
+    "weighted avg": {
+      "precision": 0.49098701026172514,
+      "recall": 0.4935260463715748,
+      "f1-score": 0.4501810418534609,
+      "support": 6642.0
+    }
+  },
+  "priority_mlp_validation": {
+    "high": {
+      "precision": 0.6542765787370104,
+      "recall": 0.6286482334869432,
+      "f1-score": 0.6412064238151195,
+      "support": 2604.0
+    },
+    "low": {
+      "precision": 0.508274231678487,
+      "recall": 0.4799107142857143,
+      "f1-score": 0.4936854190585534,
+      "support": 1344.0
+    },
+    "medium": {
+      "precision": 0.6043190525949147,
+      "recall": 0.6440237564959168,
+      "f1-score": 0.6235399820305481,
+      "support": 2694.0
+    },
+    "accuracy": 0.6047877145438121,
+    "macro avg": {
+      "precision": 0.5889566210034707,
+      "recall": 0.5841942347561915,
+      "f1-score": 0.5861439416347404,
+      "support": 6642.0
+    },
+    "weighted avg": {
+      "precision": 0.6044703863441375,
+      "recall": 0.6047877145438121,
+      "f1-score": 0.6041902201775916,
+      "support": 6642.0
+    }
+  },
+  "priority_mlp_test": {
+    "high": {
+      "precision": 0.6684677730605944,
+      "recall": 0.6653860929696505,
+      "f1-score": 0.666923373122834,
+      "support": 2603.0
+    },
+    "low": {
+      "precision": 0.5220588235294118,
+      "recall": 0.5278810408921933,
+      "f1-score": 0.5249537892791127,
+      "support": 1345.0
+    },
+    "medium": {
+      "precision": 0.6295057599405426,
+      "recall": 0.6288047512991833,
+      "f1-score": 0.629155060352832,
+      "support": 2694.0
+    },
+    "accuracy": 0.622704004817826,
+    "macro avg": {
+      "precision": 0.6066774521768495,
+      "recall": 0.6073572950536757,
+      "f1-score": 0.6070107409182596,
+      "support": 6642.0
+    },
+    "weighted avg": {
+      "precision": 0.623017050316713,
+      "recall": 0.622704004817826,
+      "f1-score": 0.6228557843134106,
+>>>>>>> 1fd79b5 (Add MLP classifier, RL routing agents)
       "support": 6642.0
     }
   }

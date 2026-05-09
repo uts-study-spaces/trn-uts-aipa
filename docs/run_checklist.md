@@ -1,6 +1,10 @@
 # Group Run Checklist
 
+<<<<<<< HEAD
 Use this checklist when a group member pulls the repo and wants to run the notebooks, training pipeline, optional transformer benchmark, or Streamlit demo.
+=======
+Use this checklist when a group member pulls the repo and wants to run the notebooks, training pipeline, or Streamlit demo.
+>>>>>>> 1fd79b5 (Add MLP classifier, RL routing agents)
 
 ## 1. Environment
 
@@ -49,16 +53,23 @@ notebooks/02_cleaning_feature_engineering.ipynb
 notebooks/03_baseline_models.ipynb
 notebooks/04_experiments_and_pipeline.ipynb
 notebooks/05_final_evaluation_and_error_analysis.ipynb
+<<<<<<< HEAD
 notebooks/06_transformer_embedding_benchmark.ipynb  optional, requires extra dependencies
 ```
 
 Notebook `03` compares TF-IDF and embeddings. Notebook `04` regenerates model files and main results using the vectorizer chosen in the configuration cell.
 Notebook `04` regenerates model files and main results.
 Notebook `06` is optional and supports the final report discussion about transformer-based semantic representations.
+=======
+```
+
+Notebook `04` regenerates model files and main results.
+>>>>>>> 1fd79b5 (Add MLP classifier, RL routing agents)
 
 ## 4. Command-Line Training
 
 ```powershell
+<<<<<<< HEAD
 # Default (TF-IDF)
 .\.venv\Scripts\python.exe -m customer_support_ai.train --vectorizer tfidf
 
@@ -67,6 +78,9 @@ Notebook `06` is optional and supports the final report discussion about transfo
 
 # Top2Vec
 .\.venv\Scripts\python.exe -m customer_support_ai.train --vectorizer top2vec
+=======
+.\.venv\Scripts\python.exe -m customer_support_ai.train
+>>>>>>> 1fd79b5 (Add MLP classifier, RL routing agents)
 ```
 
 This saves:
@@ -95,6 +109,7 @@ This creates presentation/report charts in `report_assets/` and extra evaluation
 .\.venv\Scripts\streamlit.exe run app/streamlit_app.py
 ```
 
+<<<<<<< HEAD
 The app has two main areas:
 
 - `Overview`: dataset/profile metrics, workflow, model charts, final report tables, per-language and per-class outputs, and optional transformer benchmark evidence when the benchmark files exist.
@@ -117,3 +132,6 @@ Run the sampled benchmark:
 ```
 
 This saves `results/transformer_embedding_benchmark.csv` and `results/transformer_embedding_benchmark.json`. Use it for report discussion and the Streamlit Overview evidence panel. The live ticket predictions still use the trained TF-IDF Linear SVM models.
+=======
+Use `docs/presentation_demo_examples.md` for stable demo inputs.
+>>>>>>> 1fd79b5 (Add MLP classifier, RL routing agents)

@@ -2,9 +2,12 @@
 __pycache__/
 *.py[cod]
 *$py.class
+<<<<<<< HEAD
 *.csv
 *.pptx
 *.ppt
+=======
+>>>>>>> 1fd79b5 (Add MLP classifier, RL routing agents)
 
 # C extensions
 *.so
@@ -149,9 +152,12 @@ models/*
 *.hdf5
 *.h5
 *.parquet
+<<<<<<< HEAD
 *.csv
 *.pptx
 *.ppt
+=======
+>>>>>>> 1fd79b5 (Add MLP classifier, RL routing agents)
 
 # Keep reusable report/evaluation outputs in version control.
 !data/raw/.gitkeep

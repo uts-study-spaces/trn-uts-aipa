@@ -1,8 +1,12 @@
 # Presentation Demo Examples
 
+<<<<<<< HEAD
 Use these examples in the Streamlit demo. They are written to show different parts of the system: queue prediction, priority prediction, routing, summarisation, explanation terms, escalation rules, and batch upload.
 
 Start in the `Overview` tab to show the dataset profile, workflow, model comparison chart, per-language/per-class evidence, and optional transformer benchmark results. Then switch to `Try Solution` for single-ticket or batch prediction.
+=======
+Use these examples in the Streamlit demo. They are written to show different parts of the system: queue prediction, priority prediction, routing, summarisation, explanation terms, and escalation rules.
+>>>>>>> 1fd79b5 (Add MLP classifier, RL routing agents)
 
 ## Example 1: Security Incident
 
@@ -64,6 +68,7 @@ Expected discussion points:
 - returns and exchanges
 - practical routing example
 - simple user-facing summary
+<<<<<<< HEAD
 
 ## Batch Upload Demo
 
@@ -84,3 +89,5 @@ Expected discussion points:
 - output includes predicted queue, predicted priority, recommended team, escalation flag, and summary
 - predictions can be downloaded as `ticket_predictions.csv`
 - reinforces that the app is a decision-support tool and humans still review the final action
+=======
+>>>>>>> 1fd79b5 (Add MLP classifier, RL routing agents)
