@@ -11,3 +11,5 @@ scikit-learn>=1.4
 seaborn>=0.13.2
 streamlit>=1.36
 google-genai>=1.0
+gensim>=4.3.0
+top2vec>=1.0.34
