@@ -52,13 +52,21 @@ notebooks/05_final_evaluation_and_error_analysis.ipynb
 notebooks/06_transformer_embedding_benchmark.ipynb  optional, requires extra dependencies
 ```
 
+Notebook `03` compares TF-IDF and embeddings. Notebook `04` regenerates model files and main results using the vectorizer chosen in the configuration cell.
 Notebook `04` regenerates model files and main results.
 Notebook `06` is optional and supports the final report discussion about transformer-based semantic representations.
 
 ## 4. Command-Line Training
 
 ```powershell
-.\.venv\Scripts\python.exe -m customer_support_ai.train
+# Default (TF-IDF)
+.\.venv\Scripts\python.exe -m customer_support_ai.train --vectorizer tfidf
+
+# Word2Vec
+.\.venv\Scripts\python.exe -m customer_support_ai.train --vectorizer word2vec
+
+# Top2Vec
+.\.venv\Scripts\python.exe -m customer_support_ai.train --vectorizer top2vec
 ```
 
 This saves:
