@@ -1,0 +1,185 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{fontspec}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{tabularx}
+
+\setmainfont{Arial}
+\hypersetup{colorlinks=true, linkcolor=blue, urlcolor=blue}
+\setlist[itemize]{leftmargin=1.2em}
+\setlist[enumerate]{leftmargin=1.4em}
+\titleformat{\section}{\Large\bfseries}{\thesection}{0.6em}{}
+\titleformat{\subsection}{\large\bfseries}{\thesubsection}{0.6em}{}
+
+\newcommand{\done}{\textcolor{green!45!black}{Done}}
+\newcommand{\partialstatus}{\textcolor{orange!80!black}{Partial}}
+\newcommand{\todo}{\textcolor{red!70!black}{Pending}}
+
+\title{\textbf{AT3 Status and Gap Report}\\
+Ticket Routing Intelligence}
+\author{Repository: \texttt{trn-uts-aipa} \\ Reviewed branch: \texttt{main} aligned with \texttt{origin/main}}
+\date{4 May 2026}
+
+\begin{document}
+\maketitle
+
+\section*{Quick Summary: What the Team Needs To Do}
+This report is designed to help the group quickly understand what is complete, what is still missing, and which small improvements can be implemented before the oral presentation and final report.
+
+\begin{enumerate}
+  \item \textbf{Complete group details:} the updated presentation now includes Mario Rubiano, but it still shows \texttt{Student 6 ID 00000000}. Replace this placeholder in the slide deck and final report.
+  \item \textbf{Prepare the demo:} train the models locally, launch Streamlit, test the Security Incident example, and keep screenshots as backup.
+  \item \textbf{Finish the final report:} write the academic PDF of up to 3500 words with the GitHub link, references, metrics, limitations, and individual contributions.
+  \item \textbf{Avoid overclaiming:} describe LLMs and GenAI as future work. A small transformer-embedding benchmark now exists, but it is optional, sampled, and not part of the Streamlit app.
+  \item \textbf{Fix or disclose technical limitations:} especially the mismatch between training with metadata and single-ticket inference using only text.
+\end{enumerate}
+
+\section{Overall Status}
+The project is in good shape for the oral presentation. It has a real-world problem, real dataset, NLP pipeline, model comparison, empirical evaluation, Streamlit app, slide deck, and speaker script. The work is not only software development: it includes supervised AI, a probabilistic baseline, symbolic rules, explainability, and template-based summarisation.
+
+Most remaining work is academic finishing work: strengthen theoretical justification, document individual contributions, deepen critical reflection, verify references, and make reproducibility clearer for another machine.
+
+\section{AT3 Requirements and Compliance}
+\small
+\renewcommand{\arraystretch}{1.18}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.18\linewidth} >{\raggedright\arraybackslash}p{0.11\linewidth} >{\raggedright\arraybackslash}p{0.16\linewidth} >{\raggedright\arraybackslash}p{0.45\linewidth}}
+\toprule
+\textbf{Requirement} & \textbf{Status} & \textbf{Deliverable} & \textbf{Current evidence, framing, and next action} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Requirement} & \textbf{Status} & \textbf{Deliverable} & \textbf{Current evidence, framing, and next action} \\
+\midrule
+\endhead
+Real-world problem and impact & \done & Report + presentation & \textbf{Frame as core content.} The slides already define multilingual customer support triage and its operational impact. Keep this concise in the presentation; expand the report introduction with significance, stakeholders, constraints, and expected benefits. \\
+\addlinespace
+Real dataset and data governance & \done & Report + presentation & \textbf{Frame as evidence.} The project uses Kaggle Multilingual Customer Support Tickets, with 44,275 final tickets after deduplication. In the report, explain why only three compatible CSVs were merged and why the \texttt{answer} field was excluded to avoid target leakage. \\
+\addlinespace
+AI workflow and implementation & \done & Report + presentation & \textbf{Frame as evidence.} The repo includes notebooks 01--05, reusable modules in \texttt{src/customer\_support\_ai/}, model training, evaluation, report assets, and Streamlit. Use the workflow diagram in slides and describe the design decisions versus implementation details in the report. \\
+\addlinespace
+Multiple AI paradigms & \partialstatus & Mainly report; brief slide mention & \textbf{Frame as partially strengthened.} Implemented paradigms include supervised NLP, probabilistic Naive Bayes baseline, symbolic routing/escalation rules, explainability, template summarisation, and an optional sampled multilingual transformer-embedding benchmark. For the presentation, mention this briefly as report evidence/time-permitting work; do not claim it replaces the app model. \\
+\addlinespace
+Theoretical justification & \partialstatus & Mainly report & \textbf{Frame as in progress.} The slides include references for TF-IDF, Linear SVM, explainability, and responsible AI. The final report should turn these into academic justification and compare trade-offs against alternatives such as multilingual transformer embeddings or LLM-based triage. \\
+\addlinespace
+Empirical evaluation & \done & Report + presentation & \textbf{Frame as evidence.} Metrics, confusion matrices, per-class F1, and per-language F1 are available in \texttt{results/}. Use headline macro F1 values in slides; include tables, figures, interpretation, and limitations in the report. \\
+\addlinespace
+Critical reflection and ethics & \partialstatus & Mainly report; final slide summary & \textbf{Frame as an improvement opportunity.} Slides mention limitations and responsible AI, but the report needs deeper analysis of moderate F1, language imbalance, privacy limits, scalability, train/inference mismatch, and human oversight. \\
+\addlinespace
+Individual contributions & \todo & Report; optional backup slide & \textbf{Frame as an immediate improvement.} Add a final report section listing each member's contribution. A slide is optional unless the tutor requests contribution evidence during Q\&A. \\
+\addlinespace
+Submission package & \partialstatus & Submission files & \textbf{Frame as an immediate checklist item.} The PowerPoint file has been renamed correctly. Remaining actions: complete \texttt{Student 6 ID 00000000}, produce the final PDF report, confirm GitHub access, and use the required file names for submission. \\
+\bottomrule
+\end{longtable}
+\renewcommand{\arraystretch}{1.0}
+\normalsize
+
+\section{Current Results}
+The selected model is \textbf{Linear SVM}. The saved test results are:
+
+\begin{center}
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{Task} & \textbf{Accuracy} & \textbf{Macro Precision} & \textbf{Macro Recall} & \textbf{Macro F1} \\
+\midrule
+Queue/category & 0.531 & 0.508 & 0.547 & 0.525 \\
+Priority & 0.581 & 0.567 & 0.569 & 0.568 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Recommended interpretation: these results are useful for first-pass triage, but they do not support full automation. The correct framing is human-in-the-loop decision support.
+
+Useful points for the final report:
+\begin{itemize}
+  \item Billing and Payments achieves the strongest category F1 score: 0.779.
+  \item High priority achieves F1 of 0.624, which is useful for urgency support.
+  \item The language analysis shows a gap: English category macro F1 is 0.604, while German category macro F1 is 0.400.
+\end{itemize}
+
+\subsection*{Optional Transformer Benchmark}
+An optional sampled benchmark was added to compare the current sparse TF-IDF representation with dense multilingual transformer embeddings. It uses the multilingual MiniLM sentence-transformer model followed by Logistic Regression on a 2,500-ticket sample.
+
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+\textbf{Task} & \textbf{Sampled Accuracy} & \textbf{Sampled Macro F1} \\
+\midrule
+Queue/category & 0.272 & 0.235 \\
+Priority & 0.357 & 0.350 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+These sampled results do not outperform the current full-data TF-IDF + Linear SVM pipeline. The benchmark is still useful for AT3 because it provides a concrete semantic transformer-based comparison and supports a responsible conclusion: the deployed demo should remain with the more stable and explainable Linear SVM pipeline, while transformer embeddings can be discussed as future work requiring tuning, larger samples, and stronger validation.
+
+\section{Local Validation}
+The repository, application, brief, speaker script, and slide deck were reviewed. The notebooks were also executed locally.
+
+\begin{itemize}
+  \item Streamlit responded correctly at \texttt{http://localhost:8501}.
+  \item Notebooks 01 to 05 executed successfully using the \texttt{python3} kernel.
+  \item The first notebook execution attempt failed because the notebooks expected a kernel named \texttt{customer-support-ai}. This should be fixed or documented.
+  \item Executed notebook copies were saved under \texttt{reports/notebook\_execution/}.
+\end{itemize}
+
+\section{Fast Improvement Opportunities}
+These improvements are small enough to implement quickly and can improve clarity, reproducibility, and academic defensibility without redesigning the project.
+
+\begin{longtable}{p{0.24\linewidth} p{0.18\linewidth} p{0.48\linewidth}}
+\toprule
+\textbf{Improvement} & \textbf{Effort} & \textbf{Impact} \\
+\midrule
+Complete Student 6 details & 5 minutes & Removes a visible placeholder from the first slide. \\
+Add backup screenshots & 15 minutes & Reduces risk if Streamlit fails during the presentation. \\
+Register the Jupyter kernel & 10 minutes & Improves reproducibility: \texttt{python -m ipykernel install --user --name customer-support-ai}. \\
+Add individual contributions & 20 minutes & Satisfies the individual assessment requirement. \\
+Add an ``implemented vs future work'' table & 20 minutes & Avoids overclaiming LLM/GenAI and demonstrates critical thinking. Include the optional transformer benchmark as implemented report evidence, and LLM/GenAI as future work. \\
+Mention transformer embeddings in the presentation & 10 minutes & Strengthens the SLO4 discussion. Recommended wording: ``We added an optional sampled transformer-embedding benchmark for the report, but the demo keeps Linear SVM because it is stronger and more explainable in our current results.'' \\
+Refine transformer benchmark if time allows & 2--4 hours & Optional for the final report. Try larger samples, class balancing, or Linear SVM on embeddings. Keep it out of the live app unless it clearly outperforms the current pipeline. \\
+Update README with exact demo command & 10 minutes & Helps every group member run the app reliably. \\
+Document train/inference limitation & 15 minutes & Shows technical honesty and prepares the team for Q\&A. \\
+Verify business references & 30 minutes & Prevents weak or inaccurate sources in the slides/report. \\
+\bottomrule
+\end{longtable}
+
+\section{Technical Risks and Open Items}
+\subsection{Training/inference mismatch}
+Training uses \texttt{model\_text}, which combines ticket text with safe metadata such as \texttt{type}, \texttt{language}, and tags. However, single-ticket prediction in the app uses only cleaned text. This means the demo input does not exactly match the training setup.
+
+\textbf{Fast action:} disclose this as a limitation in the report and Q\&A. \textbf{Better action:} train a text-only model or add metadata fields to the app.
+
+\subsection{Multilingual preprocessing}
+\texttt{clean\_text()} removes characters outside \texttt{a-z0-9}, which can affect accented characters and non-English text in Spanish, French, Portuguese, and German.
+
+\textbf{Fast action:} mention this as a limitation. \textbf{Better action:} adjust cleaning to preserve Unicode letters.
+
+\subsection{Partial privacy protection}
+The app masks emails and phone numbers in summaries, but it does not cover every possible form of personally identifiable information.
+
+\textbf{Fast action:} describe this as basic privacy masking, not complete anonymisation.
+
+\subsection{Optional transformer benchmark}
+The optional transformer benchmark now exists, but it is sampled and currently performs below the full-data TF-IDF + Linear SVM results. This is not a failure; it is useful empirical evidence that a transformer representation is not automatically better without tuning, enough training data, and careful validation.
+
+\textbf{Presentation action:} mention it briefly as report evidence or future refinement, not as the main system.
+
+\textbf{Report action:} use it to strengthen the comparison of AI approaches: sparse lexical TF-IDF versus dense semantic multilingual embeddings. Explain that the production/demo choice remains Linear SVM because it currently offers better measured performance, lower complexity, and clearer explanation terms.
+
+\section{Recommended Closing Plan}
+\begin{enumerate}
+  \item \textbf{Before the oral presentation:} complete Student 6, test the demo, and prepare screenshots.
+  \item \textbf{This week:} write the final report using the required brief sections and academic references.
+  \item \textbf{Before 16 May 2026:} check Turnitin similarity, confirm the GitHub repository is accessible, add contribution statements, and export \texttt{AT3\_Report\_Group\_2.pdf}.
+\end{enumerate}
+
+\section{Conclusion}
+The project is on track and has real technical evidence. To better meet AT3, the team should now focus on finishing details, academic framing, and critical reflection. The priority is not to build a large new feature; it is to close the project clearly, reproducibly, and honestly.
+
+\end{document}
