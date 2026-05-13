@@ -23,6 +23,7 @@ Customer support teams receive high volumes of tickets across account access, bi
 - Template-based summarisation with privacy masking.
 - Explainability using influential TF-IDF terms.
 - Report-ready metrics and confusion matrices.
+- LLM agent (AI Assistant tab) that uses Gemini to orchestrate the trained ML models as tools to triage tickets, draft suggested replies, and summarise batch results.
 
 ## Repository Structure
 
@@ -156,6 +157,12 @@ After training the models:
 ```
 
 The interface lets a user paste a support ticket and returns the predicted category, predicted priority, recommended team, summary, escalation flag, and explanation terms. Stable presentation examples are available in `docs/presentation_demo_examples.md`.
+
+## Using the AI Assistant
+
+Navigate to **Try Solution → AI Assistant**. Enter a Gemini API key when prompted - a working key is provided in the Canvas report submission under Section 7 - GitHub Repository to avoid key misuse.
+
+Type or paste a support ticket into the chat input and press Enter to triage it. To process a batch, click the **+** button in the chat input to attach a CSV or Excel file.
 
 ## Responsible AI Notes
 
