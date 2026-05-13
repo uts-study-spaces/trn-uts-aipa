@@ -11,6 +11,10 @@ from .explainability import top_tfidf_terms
 from .features import clean_text
 from .routing_rules import escalation_required, recommend_team
 from .summarisation import summarise_ticket
+from .rl_routing_agent import RoutingAgent as _RoutingAgent
+
+# Shared agent instance
+_rl_agent = _RoutingAgent()
 
 
 def load_model(path: str | Path):
@@ -23,6 +27,7 @@ def analyse_ticket(text: str, category_model, priority_model) -> dict:
 
     category = str(category_model.predict([model_text])[0])
     priority = str(priority_model.predict([model_text])[0])
+    rl_action = _rl_agent.route(category, priority)
 
     return {
         "category": category,
@@ -32,6 +37,8 @@ def analyse_ticket(text: str, category_model, priority_model) -> dict:
         "escalation_required": escalation_required(priority, text),
         "category_explanation_terms": top_tfidf_terms(category_model, model_text),
         "priority_explanation_terms": top_tfidf_terms(priority_model, model_text),
+        "rl_routing_action": rl_action,
+        
     }
 
 
