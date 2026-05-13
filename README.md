@@ -18,6 +18,7 @@ Customer support teams receive high volumes of tickets across account access, bi
   - TF-IDF + Logistic Regression
   - TF-IDF + Linear SVM
   - TF-IDF + Naive Bayes
+- Optional multilingual transformer-embedding benchmark for final report discussion.
 - Separate supervised models for category prediction and priority prediction.
 - Rule-based reasoning for routing and escalation.
 - Template-based summarisation with privacy masking.
@@ -57,6 +58,9 @@ src/customer_support_ai/     Reusable implementation code
 
 05_final_evaluation_and_error_analysis.ipynb
   Test results, example predictions, failure cases, limitations, and responsible AI reflection.
+
+06_transformer_embedding_benchmark.ipynb
+  Optional sampled comparison of TF-IDF with multilingual transformer embeddings for SLO4/future-work discussion.
 ```
 
 ## Setup
@@ -73,6 +77,12 @@ If your machine has uv installed, this also works:
 
 ```powershell
 uv sync
+```
+
+Optional transformer benchmark dependencies:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements-transformer.txt
 ```
 
 ## Dataset
@@ -148,6 +158,24 @@ After training the models:
 
 This creates dataset, model comparison, per-class, per-language, and workflow charts in `report_assets/`. It also saves `results/per_class_f1.csv` and `results/per_language_metrics.csv` for report tables.
 
+## Optional Transformer-Embedding Benchmark
+
+The main app still uses TF-IDF + Linear SVM because it is lightweight, reproducible, and explainable. For the final report, the project also includes an optional sampled benchmark that compares sparse TF-IDF features with dense multilingual transformer embeddings.
+
+Install the optional dependency and run:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements-transformer.txt
+.\.venv\Scripts\python.exe -m customer_support_ai.transformer_benchmark --sample-size 2500
+```
+
+This saves:
+
+- `results/transformer_embedding_benchmark.csv`
+- `results/transformer_embedding_benchmark.json`
+
+The benchmark is intentionally not integrated into Streamlit. It should be used as report evidence or future-work discussion, not as a replacement for the final demo model.
+
 ## Run the Final Interface
 
 After training the models:
@@ -172,6 +200,7 @@ This system is decision support, not full automation. It avoids using resolution
 
 - Actual implementation pipeline is in place and configured for the compatible merged Kaggle CSV files.
 - Staged notebooks 01 to 05 run successfully with the merged local dataset.
+- Optional notebook 06 runs a sampled multilingual transformer-embedding benchmark for comparison and future-work discussion.
 - Current strongest model is Linear SVM for both queue and priority prediction.
 - Current modelling dataset has 44,275 usable rows after auditing five CSV files and deduplicating the three compatible files.
 - Report-ready metrics, classification reports, confusion matrices, extra evaluation tables, slide charts, and example success/failure cases have been regenerated.
