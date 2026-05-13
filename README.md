@@ -135,7 +135,20 @@ Final training with the compatible merged Kaggle dataset:
 
 ```powershell
 .\.venv\Scripts\python.exe -m customer_support_ai.download_data
-.\.venv\Scripts\python.exe -m customer_support_ai.train
+.\.venv\Scripts\python.exe -m customer_support_ai.train --vectorizer tfidf
+```
+
+### Switchable Text Representations
+
+You can now compare different NLP embedding methods by using the `--vectorizer` flag:
+
+- `tfidf` (Default): Traditional sparse representation.
+- `word2vec`: Dense word embeddings averaged per ticket.
+- `top2vec`: Document embeddings using the Top2Vec library.
+
+Example:
+```powershell
+.\.venv\Scripts\python.exe -m customer_support_ai.train --vectorizer word2vec
 ```
 
 Training saves:
