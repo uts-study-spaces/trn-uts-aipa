@@ -1,6 +1,8 @@
 # Presentation Demo Examples
 
-Use these examples in the Streamlit demo. They are written to show different parts of the system: queue prediction, priority prediction, routing, summarisation, explanation terms, and escalation rules.
+Use these examples in the Streamlit demo. They are written to show different parts of the system: queue prediction, priority prediction, routing, summarisation, explanation terms, escalation rules, and batch upload.
+
+Start in the `Overview` tab to show the dataset profile, workflow, model comparison chart, per-language/per-class evidence, and optional transformer benchmark results. Then switch to `Try Solution` for single-ticket or batch prediction.
 
 ## Example 1: Security Incident
 
@@ -62,3 +64,23 @@ Expected discussion points:
 - returns and exchanges
 - practical routing example
 - simple user-facing summary
+
+## Batch Upload Demo
+
+For the batch workflow, create a small CSV or Excel file with a column named `ticket_text`. The app also recognises columns such as `body`, `description`, `message`, `text`, or `subject`.
+
+Example CSV content:
+
+```csv
+ticket_text
+"Subject: Possible unauthorised access to admin portal. Body: Several staff received unexpected password reset emails and one admin account shows login attempts from an unknown location."
+"Subject: Duplicate invoice charged to account. Body: Our company subscription was charged twice for the same billing period and we need the duplicate payment reversed."
+"Subject: Dashboard unavailable for multiple users. Body: The customer reporting dashboard has been unavailable for an hour and multiple users cannot view live case data."
+```
+
+Expected discussion points:
+
+- shows the app can analyse multiple tickets without manually pasting each one
+- output includes predicted queue, predicted priority, recommended team, escalation flag, and summary
+- predictions can be downloaded as `ticket_predictions.csv`
+- reinforces that the app is a decision-support tool and humans still review the final action
