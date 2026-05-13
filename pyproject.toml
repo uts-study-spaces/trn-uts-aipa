@@ -19,8 +19,9 @@ dependencies = [
     "streamlit>=1.36",
     "gensim>=4.3.0",
     "top2vec>=1.0.34",
-    "torch",
-    "ipywidgets",
+    "google-genai>=1.0",
+    "torch>=2.11",
+    "ipywidgets>=8.1",
 ]
 
 [build-system]
