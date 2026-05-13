@@ -25,6 +25,7 @@ Customer support teams receive high volumes of tickets across account access, bi
 - Explainability using influential TF-IDF terms.
 - Streamlit interface with overview evidence, single-ticket prediction, batch upload, and downloadable batch predictions.
 - Report-ready metrics and confusion matrices.
+- LLM agent (AI Assistant tab) that uses Gemini to orchestrate the trained ML models as tools to triage tickets, draft suggested replies, and summarise batch results.
 
 ## Repository Structure
 
@@ -190,6 +191,12 @@ The interface has two tabs:
 - `Try Solution`: supports single-ticket analysis and batch upload. Single-ticket mode returns the predicted category, predicted priority, recommended team, summary, escalation flag, and explanation terms. Batch mode accepts CSV, XLSX, or XLS files with a ticket text column and analyses up to 200 rows, then offers a downloadable predictions CSV.
 
 Stable presentation examples are available in `docs/presentation_demo_examples.md`.
+
+## Using the AI Assistant
+
+Navigate to **Try Solution → AI Assistant**. Enter a Gemini API key when prompted - a working key is provided in the Canvas report submission under Section 7 - GitHub Repository to avoid key misuse.
+
+Type or paste a support ticket into the chat input and press Enter to triage it. To process a batch, click the **+** button in the chat input to attach a CSV or Excel file.
 
 ## Responsible AI Notes
 
