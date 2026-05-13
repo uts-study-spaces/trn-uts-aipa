@@ -6,7 +6,7 @@ Build an explainable AI decision-support implementation for customer service tea
 
 ## HD Alignment
 
-- Multiple AI paradigms: supervised NLP classification, rule-based reasoning, knowledge representation through routing rules, and template-based summarisation.
+- Multiple AI paradigms: supervised NLP classification, rule-based reasoning, knowledge representation through routing rules, template-based summarisation, and an optional transformer-embedding benchmark for semantic multilingual representation.
 - Theoretical justification: compare TF-IDF Logistic Regression, Linear SVM, and Naive Bayes as explainable text classification methods.
 - Empirical evaluation: use train/validation/test splitting and report accuracy, macro precision, macro recall, macro F1, weighted F1, and confusion matrices for category and priority.
 - Additional analysis: include per-class F1 and per-language performance to support critical reflection on multilingual behaviour.
@@ -78,6 +78,7 @@ This uses `kagglehub`, which downloads the dataset from Kaggle and stores the co
 17. Use rule-based reasoning for routing and escalation.
 18. Use TF-IDF feature weights for explanation terms.
 19. Present the final trained system through a Streamlit interface.
+20. Optionally compare TF-IDF features with multilingual transformer embeddings on a sampled benchmark for final report discussion.
 
 ## Notebooks
 
@@ -86,6 +87,7 @@ This uses `kagglehub`, which downloads the dataset from Kaggle and stores the co
 - `03_baseline_models.ipynb`: baseline model comparison.
 - `04_experiments_and_pipeline.ipynb`: reusable training pipeline and model selection.
 - `05_final_evaluation_and_error_analysis.ipynb`: final metrics, examples, failure cases, and reflection.
+- `06_transformer_embedding_benchmark.ipynb`: optional sampled benchmark using multilingual transformer embeddings plus a simple supervised classifier.
 
 ## Report and Presentation Assets
 

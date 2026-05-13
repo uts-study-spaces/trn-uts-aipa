@@ -638,6 +638,7 @@ def overview_tab(profile: dict, metrics: pd.DataFrame) -> None:
     frame = load_model_ready_data()
     per_language = load_optional_csv("per_language_metrics.csv")
     per_class = load_optional_csv("per_class_f1.csv")
+    transformer_benchmark = load_optional_csv("transformer_embedding_benchmark.csv")
 
     left, right = st.columns(2)
     with left:
@@ -651,8 +652,10 @@ def overview_tab(profile: dict, metrics: pd.DataFrame) -> None:
 
     left, right = st.columns(2)
     with left:
-        if not metrics.empty:
-            chart_data = metrics.assign(label=metrics["task"] + " | " + metrics["model"] + " | " + metrics["split"])
+        chart_sources = [data for data in [metrics, transformer_benchmark] if not data.empty]
+        if chart_sources:
+            chart_data = pd.concat(chart_sources, ignore_index=True)
+            chart_data = chart_data.assign(label=chart_data["task"] + " | " + chart_data["model"] + " | " + chart_data["split"])
             chart_card("Model Comparison by Macro F1", chart_data, "label", "macro_f1", color="task", height=330)
     with right:
         if not per_language.empty:
@@ -661,12 +664,14 @@ def overview_tab(profile: dict, metrics: pd.DataFrame) -> None:
     with st.expander("Detailed Report Tables"):
         table_choice = st.radio(
             "Detailed table choice",
-            ["Final test metrics", "Per-language metrics", "Per-class F1"],
+            ["Final test metrics", "Transformer benchmark", "Per-language metrics", "Per-class F1"],
             horizontal=True,
             label_visibility="collapsed",
         )
         if table_choice == "Final test metrics":
             render_dark_table(metrics[metrics["split"] == "test"] if not metrics.empty else pd.DataFrame())
+        elif table_choice == "Transformer benchmark":
+            render_dark_table(transformer_benchmark)
         elif table_choice == "Per-language metrics":
             render_dark_table(per_language)
         else:
