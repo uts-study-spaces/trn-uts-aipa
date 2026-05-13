@@ -25,5 +25,6 @@
     "answer"
   ],
   "category_target": "queue",
-  "priority_target": "priority"
+  "priority_target": "priority",
+  "vectorizer_type": "tfidf"
 }

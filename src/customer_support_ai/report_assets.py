@@ -217,8 +217,8 @@ def create_workflow_diagram() -> None:
         "Audit 5 Kaggle CSVs",
         "Merge 3 compatible files",
         "Clean text and metadata",
-        "Train baseline models",
-        "Select Linear SVM",
+        "Compare TF-IDF & Embeddings",
+        "Select Best representation",
         "Evaluate and explain",
         "Streamlit decision support",
     ]

@@ -4,12 +4,14 @@ from __future__ import annotations
 
 import numpy as np
 
+from sklearn.feature_extraction.text import TfidfVectorizer
+
 
 def top_tfidf_terms(model_pipeline, text: str, top_n: int = 8) -> list[tuple[str, float]]:
     """Return the terms that most supported the predicted class."""
-    vectorizer = model_pipeline.named_steps.get("tfidf")
+    vectorizer = model_pipeline.named_steps.get("vectorizer") or model_pipeline.named_steps.get("tfidf")
     classifier = model_pipeline.named_steps.get("model")
-    if vectorizer is None or classifier is None or not hasattr(classifier, "coef_"):
+    if not isinstance(vectorizer, TfidfVectorizer) or classifier is None or not hasattr(classifier, "coef_"):
         return []
 
     transformed = vectorizer.transform([text])
