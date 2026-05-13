@@ -561,6 +561,23 @@ def render_result(result: dict) -> None:
             unsafe_allow_html=True,
         )
 
+    queue_confidence = result.get("queue_confidence")
+    priority_confidence = result.get("priority_confidence")
+    if queue_confidence is not None and priority_confidence is not None:
+        review_label = "Required" if result.get("human_review_required") else "Standard review"
+        st.markdown("#### Confidence and Human Review")
+        st.markdown(
+            f"""
+            <div class="section-card">
+            <b>Queue confidence:</b> {queue_confidence:.2f} ({result.get('queue_confidence_level', 'N/A')})<br>
+            <b>Priority confidence:</b> {priority_confidence:.2f} ({result.get('priority_confidence_level', 'N/A')})<br>
+            <b>Human review:</b> {review_label}<br>
+            <b>Reason:</b> {result.get('human_review_reason', 'Confidence guidance unavailable.')}
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
 
 def render_workflow() -> None:
     """Render a one-line project workflow."""
@@ -853,6 +870,9 @@ def render_batch_upload_form() -> None:
                         "predicted_priority": result["priority"],
                         "recommended_team": result["recommended_team"],
                         "escalation_required": result["escalation_required"],
+                        "queue_confidence": result.get("queue_confidence"),
+                        "priority_confidence": result.get("priority_confidence"),
+                        "human_review_required": result.get("human_review_required"),
                         "summary": result["summary"],
                     }
                 )

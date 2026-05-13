@@ -21,6 +21,8 @@ Customer support teams receive high volumes of tickets across account access, bi
 - Optional multilingual transformer-embedding benchmark for final report discussion.
 - Separate supervised models for category prediction and priority prediction.
 - Rule-based reasoning for routing and escalation.
+- Confidence-aware human review guidance for queue and priority outputs.
+- Optional confidence-aware ensemble extension for responsible AI evaluation.
 - Template-based summarisation with privacy masking.
 - Explainability using influential TF-IDF terms.
 - Streamlit interface with overview evidence, single-ticket prediction, batch upload, and downloadable batch predictions.
@@ -190,6 +192,35 @@ This saves:
 
 The benchmark is not used for live ticket prediction. If the benchmark output files exist, Streamlit displays them in the Overview tab alongside the main TF-IDF model results so they can support report and presentation discussion.
 
+## Optional Confidence-Aware Ensemble
+
+A confidence-aware extension was added as Amal's contribution. It uses a soft-voting ensemble that combines Logistic Regression, calibrated Linear SVM, and Naive Bayes. The extension supports responsible AI discussion by reporting coverage, human-review rate, and high-confidence accuracy.
+
+Run:
+
+```powershell
+.\.venv\Scripts\python.exe -m customer_support_ai.ensemble
+```
+
+This saves:
+
+- `models/category_confidence_ensemble.pkl`
+- `models/priority_confidence_ensemble.pkl`
+- `results/confidence_ensemble_results.csv`
+- `results/category_confidence_examples.csv`
+- `results/priority_confidence_examples.csv`
+
+## Reproducibility and Responsible AI Checks
+
+The repository includes a lightweight health check and test suite:
+
+```powershell
+.\.venv\Scripts\python.exe -m customer_support_ai.repository_health
+.\.venv\Scripts\python.exe -m pytest
+```
+
+Supporting documentation was added in `docs/model_card.md`, `docs/responsible_ai_audit.md`, and `docs/reproducibility_checklist.md`.
+
 ## Run the Final Interface
 
 After training the models:
@@ -201,7 +232,9 @@ After training the models:
 The interface has two tabs:
 
 - `Overview`: shows dataset size, compatible CSV count, duplicates removed, best test macro F1, workflow, language/priority charts, final metrics, per-language and per-class results, and the optional transformer benchmark table/chart when available.
-- `Try Solution`: supports single-ticket analysis and batch upload. Single-ticket mode returns the predicted category, predicted priority, recommended team, summary, escalation flag, and explanation terms. Batch mode accepts CSV, XLSX, or XLS files with a ticket text column and analyses up to 200 rows, then offers a downloadable predictions CSV.
+- `Try Solution`: supports single-ticket analysis and batch upload. Single-ticket mode returns the predicted category, predicted priority, recommended team, summary, escalation flag, confidence guidance, and explanation terms. Batch mode accepts CSV, XLSX, or XLS files with a ticket text column and analyses up to 200 rows, then offers a downloadable predictions CSV.
+
+Single-ticket and batch outputs also display queue confidence, priority confidence, and human-review guidance when confidence estimates are available.
 
 Stable presentation examples are available in `docs/presentation_demo_examples.md`.
 
