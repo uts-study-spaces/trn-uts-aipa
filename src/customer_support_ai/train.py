@@ -12,6 +12,8 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.pipeline import Pipeline
 from sklearn.svm import LinearSVC
+from sklearn.neural_network import MLPClassifier
+from sklearn.decomposition import TruncatedSVD
 
 from .config import DATA_PROCESSED_DIR, DEFAULT_DATASET_PATH, MODELS_DIR, RESULTS_DIR
 from .data_preprocessing import (
@@ -50,6 +52,18 @@ def build_models(vectorizer_type: str = "tfidf") -> dict[str, Pipeline]:
             [
                 ("vectorizer", get_vectorizer(vectorizer_type)),
                 ("model", LinearSVC(class_weight="balanced")),
+            ]
+        ),
+        "mlp": Pipeline(
+             [
+                ("tfidf", TfidfVectorizer(ngram_range=(1, 2), min_df=2, max_features=30000)),
+                ("svd", TruncatedSVD(n_components=300, random_state=42)),
+                ("model", MLPClassifier(
+                    hidden_layer_sizes=(256, 128),
+                    solver="adam",
+                    max_iter=100,
+                    random_state=42,
+                )),
             ]
         ),
     }
