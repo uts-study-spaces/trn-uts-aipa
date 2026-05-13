@@ -2,7 +2,7 @@
 
 ## Aim
 
-Build an explainable AI decision-support implementation for customer service teams. The system predicts ticket category and priority, recommends a team, creates a short summary, explains model decisions, and flags escalation risk.
+Build an explainable AI decision-support implementation for customer service teams. The system predicts ticket category and priority, recommends a team, creates a short summary, explains model decisions, flags escalation risk, and supports small batch triage through the demo app.
 
 ## HD Alignment
 
@@ -75,10 +75,10 @@ This uses `kagglehub`, which downloads the dataset from Kaggle and stores the co
 14. Save metrics, classification reports, and confusion matrices.
 15. Generate report and presentation charts from the saved results.
 16. Analyse per-class and per-language performance.
-17. Use rule-based reasoning for routing and escalation.
-18. Use TF-IDF feature weights for explanation terms.
-19. Present the final trained system through a Streamlit interface.
-20. Optionally compare TF-IDF features with multilingual transformer embeddings on a sampled benchmark for final report discussion.
+17. Optionally compare TF-IDF features with multilingual transformer embeddings on a sampled benchmark for final report discussion.
+18. Use rule-based reasoning for routing and escalation.
+19. Use TF-IDF feature weights for explanation terms.
+20. Present the final trained system through a Streamlit interface with Overview evidence, single-ticket analysis, batch upload, and downloadable batch predictions.
 
 ## Notebooks
 
@@ -99,6 +99,17 @@ python -m customer_support_ai.report_assets
 
 Generated assets include dataset distribution charts, model comparison charts, per-class F1 charts, per-language macro F1 chart, and a workflow diagram. These outputs support the Stage 1 presentation and Stage 2 report evidence.
 
+The optional transformer benchmark saves `results/transformer_embedding_benchmark.csv` and `results/transformer_embedding_benchmark.json`. The benchmark is deliberately separate from the production-style app prediction path because it requires heavier dependencies and is run on a sample. When those result files exist, the Streamlit Overview tab displays them as comparison evidence alongside the main TF-IDF model metrics.
+
+## Streamlit Demo
+
+The demo app is in `app/streamlit_app.py`. It has:
+
+- `Overview`: evidence dashboard with dataset profile, workflow, language and priority charts, final metrics, transformer benchmark display, per-language metrics, and per-class F1 tables.
+- `Try Solution`: single-ticket prediction and a batch upload flow for CSV/XLSX/XLS files. Batch mode analyses up to 200 rows and exports a predictions CSV.
+
+The live predictions use the trained TF-IDF Linear SVM models saved in `models/`. The transformer benchmark is shown for comparison only and is not used to route tickets in the demo.
+
 ## Group Work Split
 
 - Member 1: dataset collection, EDA, and data quality notes.
@@ -106,6 +117,6 @@ Generated assets include dataset distribution charts, model comparison charts, p
 - Member 3: category model training and comparison.
 - Member 4: priority model training and comparison.
 - Member 5: routing, escalation, summarisation, and explainability.
-- Member 6: Streamlit demo, README, report assets, and integration testing.
+- Member 6: Streamlit demo, batch upload workflow, README, report assets, and integration testing.
 
 Update the final names and student IDs before report submission.

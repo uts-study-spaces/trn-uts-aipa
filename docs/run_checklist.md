@@ -1,6 +1,6 @@
 # Group Run Checklist
 
-Use this checklist when a group member pulls the repo and wants to run the notebooks, training pipeline, or Streamlit demo.
+Use this checklist when a group member pulls the repo and wants to run the notebooks, training pipeline, optional transformer benchmark, or Streamlit demo.
 
 ## 1. Environment
 
@@ -87,7 +87,12 @@ This creates presentation/report charts in `report_assets/` and extra evaluation
 .\.venv\Scripts\streamlit.exe run app/streamlit_app.py
 ```
 
-Use `docs/presentation_demo_examples.md` for stable demo inputs.
+The app has two main areas:
+
+- `Overview`: dataset/profile metrics, workflow, model charts, final report tables, per-language and per-class outputs, and optional transformer benchmark evidence when the benchmark files exist.
+- `Try Solution`: single-ticket analysis plus CSV/XLSX/XLS batch upload for up to 200 rows, with downloadable predictions.
+
+Use `docs/presentation_demo_examples.md` for stable demo inputs and a suggested batch-upload demonstration.
 
 ## 7. Optional Transformer Benchmark
 
@@ -103,4 +108,4 @@ Run the sampled benchmark:
 .\.venv\Scripts\python.exe -m customer_support_ai.transformer_benchmark --sample-size 2500
 ```
 
-This saves `results/transformer_embedding_benchmark.csv` and `results/transformer_embedding_benchmark.json`. Use it for report discussion, not for the live Streamlit demo.
+This saves `results/transformer_embedding_benchmark.csv` and `results/transformer_embedding_benchmark.json`. Use it for report discussion and the Streamlit Overview evidence panel. The live ticket predictions still use the trained TF-IDF Linear SVM models.
