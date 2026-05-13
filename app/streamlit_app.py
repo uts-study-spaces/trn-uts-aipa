@@ -14,7 +14,7 @@ from customer_support_ai.config import DATA_PROCESSED_DIR, MODELS_DIR, RESULTS_D
 from customer_support_ai.predict import analyse_ticket, load_model
 
 try:
-    from customer_support_ai.llm_agent import analyse_batch, create_chat_session, send_message
+    from customer_support_ai.llm_agent import analyse_batch, create_chat_session, send_message, validate_api_key
     _AGENT_AVAILABLE = True
 except ImportError:
     _AGENT_AVAILABLE = False
@@ -180,15 +180,29 @@ def inject_style() -> None:
             overflow: visible !important;
             text-overflow: clip !important;
         }
-        .stTextArea label, .stSelectbox label, .stSlider label, .stFileUploader label {
+        .stTextArea label, .stSelectbox label, .stSlider label, .stFileUploader label, .stTextInput label {
             color: #f2f7fb !important;
             font-weight: 800;
+        }
+        .stTextInput input {
+            background: #f8fafc !important;
+            color: #111827 !important;
+            border: 1px solid rgba(170, 211, 243, 0.55) !important;
+            caret-color: #111827 !important;
         }
         .stTextArea textarea {
             background: #f8fafc !important;
             color: #111827 !important;
             border: 1px solid rgba(170, 211, 243, 0.55) !important;
             caret-color: #111827 !important;
+        }
+        div[data-testid="stChatMessage"] p,
+        div[data-testid="stChatMessage"] li,
+        div[data-testid="stChatMessage"] span {
+            color: #e8f1f9 !important;
+        }
+        .st-key-agent_api_key_input [data-testid="InputInstructions"] {
+            display: none !important;
         }
         .stTextArea textarea::placeholder {
             color: #64748b !important;
@@ -273,7 +287,7 @@ def inject_style() -> None:
         }
         div[data-testid="stVerticalBlockBorderWrapper"] {
             background: rgba(255, 255, 255, 0.075);
-            border: 1px solid rgba(255, 255, 255, 0.16);
+            border: 1px solid rgba(94, 234, 212, 0.4);
             border-radius: 8px;
             box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16);
             padding: 0.7rem;
@@ -330,6 +344,20 @@ def inject_style() -> None:
             color: #e8f1f9;
             padding: 0.65rem 0.7rem;
             border-bottom: 1px solid rgba(170, 211, 243, 0.10);
+        }
+        div[data-testid="stVerticalBlockBorderWrapper"] ::-webkit-scrollbar {
+            width: 7px;
+        }
+        div[data-testid="stVerticalBlockBorderWrapper"] ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+        div[data-testid="stVerticalBlockBorderWrapper"] ::-webkit-scrollbar-thumb {
+            background: rgba(94, 234, 212, 0.55);
+            border-radius: 4px;
+        }
+        div[data-testid="stVerticalBlockBorderWrapper"] ::-webkit-scrollbar-thumb:hover {
+            background: rgba(94, 234, 212, 0.85);
         }
         </style>
         """,
@@ -846,78 +874,131 @@ def ai_assistant_tab() -> None:
         st.error("google-genai is not installed. Run: pip install google-genai")
         return
 
+    if "agent_key_valid" not in st.session_state:
+        import os
+        effective_key = st.session_state.get("agent_api_key") or os.environ.get("GEMINI_API_KEY", "")
+        if effective_key:
+            st.session_state["agent_key_valid"] = validate_api_key(effective_key)
+        else:
+            st.session_state["agent_key_valid"] = None
+        st.rerun()
+
     header_col, key_col = st.columns([0.65, 0.35])
     with header_col:
         st.markdown("### AI Triage Assistant")
-        st.caption(
-            "Type or paste a support ticket to analyse it. "
-            "To process a batch, click the **+** button on the left of the chat input to attach a CSV or Excel file. "
-            "The agent calls the trained ML models as tools and drafts a suggested reply."
+        st.markdown(
+            "<p style='color:#c8e6f3;font-size:0.95rem;margin:0'>Type or paste a support ticket to analyse it.</p>"
+            "<p style='color:#c8e6f3;font-size:0.95rem;margin:0.2rem 0 0 0'>To process a batch, click the <b>+</b> button on the left of the chat input to attach a CSV or Excel file.</p>",
+            unsafe_allow_html=True,
         )
     with key_col:
         st.markdown("<div style='margin-top:0.6rem'></div>", unsafe_allow_html=True)
-        submitted_key = st.text_input(
+
+        def _apply_key():
+            key = st.session_state.get("agent_api_key_input", "").strip()
+            if key:
+                st.session_state["agent_key_valid"] = validate_api_key(key)
+                if st.session_state["agent_key_valid"]:
+                    st.session_state["agent_api_key"] = key
+                else:
+                    st.session_state.pop("agent_api_key", None)
+                st.session_state.pop("agent_chat", None)
+            else:
+                st.session_state["agent_key_valid"] = None
+
+        st.text_input(
             "Gemini API key",
             type="password",
-            placeholder="Paste your API key here",
+            placeholder="Enter your API key here",
             key="agent_api_key_input",
+            on_change=_apply_key,
         )
-        if st.button("Apply key", key="agent_apply_key"):
-            st.session_state["agent_api_key"] = submitted_key.strip()
-            st.session_state.pop("agent_chat", None)
-            st.rerun()
+        btn_col, status_col = st.columns([0.45, 0.55])
+        with btn_col:
+            if st.button("Apply key", key="agent_apply_key"):
+                _apply_key()
+                st.rerun()
+        with status_col:
+            key_status = st.session_state.get("agent_key_valid")
+            if key_status is True:
+                st.markdown("<div style='padding-top:0.4rem'>✅ <b>Valid API Key</b></div>", unsafe_allow_html=True)
+            elif key_status is False:
+                st.markdown("<div style='padding-top:0.4rem'>❌ <b>Invalid API Key</b></div>", unsafe_allow_html=True)
 
     api_key = st.session_state.get("agent_api_key") or None
 
-    if "agent_chat" not in st.session_state:
-        try:
-            category_model, priority_model = load_models()
-            client, chat, tool_map = create_chat_session(category_model, priority_model, api_key=api_key)
-            st.session_state["agent_client"] = client
-            st.session_state["agent_chat"] = chat
-            st.session_state["agent_tool_map"] = tool_map
-            st.session_state["agent_messages"] = []
-        except FileNotFoundError:
-            st.error("Model files are missing. Train the models first with: python -m customer_support_ai.train")
-            return
-        except ValueError as exc:
-            st.warning(str(exc))
-            return
+    _invalid_key_msg = (
+        "The API key you entered is invalid. Please check it and try a different one using the field above.\n\n"
+        "**(ASSESSMENT ONLY) A valid API key for testing is available in the Canvas report submission under Section 7 - GitHub Repository.**"
+    )
 
-    reset_col, _ = st.columns([0.22, 0.78])
-    with reset_col:
-        if st.button("Reset conversation", key="agent_reset"):
+    no_key = False
+    if "agent_chat" not in st.session_state:
+        if st.session_state.get("agent_key_valid") is False:
+            st.session_state["agent_messages"] = [{"role": "assistant", "content": _invalid_key_msg}]
+            no_key = True
+        else:
             try:
                 category_model, priority_model = load_models()
                 client, chat, tool_map = create_chat_session(category_model, priority_model, api_key=api_key)
                 st.session_state["agent_client"] = client
                 st.session_state["agent_chat"] = chat
                 st.session_state["agent_tool_map"] = tool_map
-                st.session_state["agent_messages"] = []
-                st.session_state.pop("agent_batch_df", None)
-                st.rerun()
-            except (FileNotFoundError, ValueError):
-                pass
+                st.session_state["agent_messages"] = [{"role": "assistant", "content": "Hello! Type or paste a support ticket below to get started - I'll classify it, recommend a team, check whether escalation is needed, and draft a suggested reply.\n\nYou can also use the **+** button on the left of the chat input to attach a CSV or Excel file for batch processing."}]
+            except FileNotFoundError:
+                st.error("Model files are missing. Train the models first with: python -m customer_support_ai.train")
+                return
+            except ValueError as exc:
+                st.session_state["agent_messages"] = [{"role": "assistant", "content": str(exc)}]
+                no_key = True
 
-    for message in st.session_state.get("agent_messages", []):
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
-            if message.get("batch") and "agent_batch_df" in st.session_state:
-                batch_df = st.session_state["agent_batch_df"]
-                if not batch_df.empty:
-                    render_dark_table(batch_df, max_rows=10)
-                    st.download_button(
-                        "Download predictions CSV",
-                        batch_df.to_csv(index=False).encode("utf-8"),
-                        file_name="agent_batch_predictions.csv",
-                        mime="text/csv",
-                    )
+    def _reset_conversation():
+        try:
+            category_model, priority_model = load_models()
+            client, chat, tool_map = create_chat_session(category_model, priority_model, api_key=api_key)
+            st.session_state["agent_client"] = client
+            st.session_state["agent_chat"] = chat
+            st.session_state["agent_tool_map"] = tool_map
+            st.session_state["agent_messages"] = [{"role": "assistant", "content": "Hello! Type or paste a support ticket below to get started - I'll classify it, recommend a team, check whether escalation is needed, and draft a suggested reply.\n\nYou can also use the **+** button on the left of the chat input to attach a CSV or Excel file for batch processing."}]
+            st.session_state.pop("agent_batch_df", None)
+            st.rerun()
+        except (FileNotFoundError, ValueError):
+            pass
 
-    response = st.chat_input(
-        "Type a ticket here, or use + on the left to attach a CSV/Excel batch file...",
-        accept_file=True,
-        file_type=["csv", "xlsx", "xls"],
-    )
+    st.markdown("<div class='mini-card-title' style='margin-bottom:0.35rem'>Conversation</div>", unsafe_allow_html=True)
+    with st.container(height=520):
+        for message in st.session_state.get("agent_messages", []):
+            with st.chat_message(message["role"]):
+                st.markdown(message["content"])
+                if message.get("batch") and "agent_batch_df" in st.session_state:
+                    batch_df = st.session_state["agent_batch_df"]
+                    if not batch_df.empty:
+                        render_dark_table(batch_df, max_rows=10)
+                        st.download_button(
+                            "Download predictions CSV",
+                            batch_df.to_csv(index=False).encode("utf-8"),
+                            file_name="agent_batch_predictions.csv",
+                            mime="text/csv",
+                        )
+
+    if no_key:
+        st.warning(st.session_state["agent_messages"][0]["content"])
+        return
+
+    status = st.empty()
+    status.markdown("<div style='min-height:1.5rem;line-height:1.5rem;padding:0.35rem 0'>✅ Ready for input</div>", unsafe_allow_html=True)
+
+    input_col, reset_col = st.columns([0.85, 0.15])
+    with input_col:
+        response = st.chat_input(
+            "Type or paste a ticket here, or use + on the left to attach a CSV/Excel batch file...",
+            accept_file=True,
+            file_type=["csv", "xlsx", "xls"],
+        )
+    with reset_col:
+        st.markdown("<div style='margin-top:0.3rem'></div>", unsafe_allow_html=True)
+        if st.button("Reset", key="agent_reset", width="stretch"):
+            _reset_conversation()
 
     if response is None:
         return
@@ -955,8 +1036,8 @@ def ai_assistant_tab() -> None:
 
         try:
             category_model, priority_model = load_models()
-            with st.spinner(f"Analysing {len(tickets)} tickets..."):
-                batch_df, narrative = analyse_batch(tickets, category_model, priority_model, api_key=api_key)
+            status.markdown(f"<div style='min-height:1.5rem;line-height:1.5rem;padding:0.35rem 0'>⏳ Analysing {len(tickets)} tickets...</div>", unsafe_allow_html=True)
+            batch_df, narrative = analyse_batch(tickets, category_model, priority_model, api_key=api_key)
             st.session_state["agent_batch_df"] = batch_df
             st.session_state["agent_messages"].append({
                 "role": "assistant",
@@ -974,18 +1055,48 @@ def ai_assistant_tab() -> None:
         prompt = response.text.strip()
         st.session_state["agent_messages"].append({"role": "user", "content": prompt})
         try:
-            with st.spinner("Analysing..."):
-                reply = send_message(st.session_state["agent_chat"], st.session_state["agent_tool_map"], prompt)
+            status.markdown("<div style='min-height:1.5rem;line-height:1.5rem;padding:0.35rem 0'>⏳ Analysing...</div>", unsafe_allow_html=True)
+            reply = send_message(st.session_state["agent_chat"], st.session_state["agent_tool_map"], prompt)
             st.session_state["agent_messages"].append({"role": "assistant", "content": reply})
         except Exception as exc:
-            st.session_state["agent_messages"].append({
-                "role": "assistant",
-                "content": (
-                    "Sorry, an error was encountered while processing your request. "
-                    "Please try again, or use the **Single ticket** or **Upload batch** tabs instead.\n\n"
-                    f"_{exc}_"
-                ),
-            })
+            if "503" in str(exc) or "UNAVAILABLE" in str(exc) or "429" in str(exc) or "RESOURCE_EXHAUSTED" in str(exc):
+                try:
+                    category_model, priority_model = load_models()
+                    client, chat, tool_map = create_chat_session(
+                        category_model, priority_model, api_key=api_key, use_fallback=True
+                    )
+                    st.session_state["agent_client"] = client
+                    st.session_state["agent_chat"] = chat
+                    st.session_state["agent_tool_map"] = tool_map
+                    status.markdown("<div style='min-height:1.5rem;line-height:1.5rem;padding:0.35rem 0'>⏳ Primary model unavailable - retrying with backup...</div>", unsafe_allow_html=True)
+                    reply = send_message(chat, tool_map, prompt)
+                    st.session_state["agent_messages"].append({"role": "assistant", "content": reply})
+                except Exception as retry_exc:
+                    st.session_state["agent_messages"].append({
+                        "role": "assistant",
+                        "content": (
+                            "Sorry, both the primary and backup models are currently unavailable. Please try again shortly.\n\n"
+                            f"_{retry_exc}_"
+                        ),
+                    })
+            elif "API_KEY_INVALID" in str(exc) or "API key not valid" in str(exc):
+                st.session_state["agent_messages"].append({
+                    "role": "assistant",
+                    "content": (
+                        "The Gemini API key appears to be invalid. "
+                        "Please check your key and try entering a different one using the field above.\n\n"
+                        f"_{exc}_"
+                    ),
+                })
+            else:
+                st.session_state["agent_messages"].append({
+                    "role": "assistant",
+                    "content": (
+                        "Sorry, an error was encountered while processing your request. "
+                        "Please try again, or use the **Single ticket** or **Upload batch** tabs instead.\n\n"
+                        f"_{exc}_"
+                    ),
+                })
         st.rerun()
 
 

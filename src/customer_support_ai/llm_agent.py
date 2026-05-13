@@ -16,18 +16,24 @@ from .routing_rules import escalation_required, recommend_team
 
 load_dotenv()
 
-GEMINI_MODEL = "gemini-3.1-flash-lite"
+GEMINI_MODEL = "gemini-3-flash-preview"
+GEMINI_MODEL_FALLBACK = "gemini-3.1-flash-lite"
+
+
+def _is_unavailable(exc: Exception) -> bool:
+    s = str(exc)
+    return "503" in s or "UNAVAILABLE" in s or "429" in s or "RESOURCE_EXHAUSTED" in s
 
 
 def _resolve_key(api_key: str | None) -> str:
     key = api_key or os.environ.get("GEMINI_API_KEY", "")
     if not key:
         raise ValueError(
-            "No Gemini API key found. Add GEMINI_API_KEY to your .env file or enter one in the app."
+            "No Gemini API key found. Please enter a valid API key above.\n\n**(ASSESSMENT ONLY) A valid API key for testing is available in the Canvas report submission under Section 7 - GitHub Repository.**"
         )
     return key
 
-_SYSTEM_PROMPT = """You are a customer support triage assistant backed by trained machine learning models.
+_SYSTEM_PROMPT = """You are a customer support triage assistant backed by trained machine learning models. Use Australian English spelling throughout all responses (e.g. specialised, recognised, analyse, organise).
 
 If the user sends a general question or message (e.g. asking how something works, or chatting), answer it conversationally without calling any tools.
 
@@ -41,7 +47,7 @@ Only call the tools when the user provides an actual customer support ticket to 
 After collecting all five results, respond with two clear sections:
 
 **Triage Results**
-Present each result (category, priority, team, escalation status, and explanation terms) in a readable format.
+Present each result in a readable format. Label the TF-IDF terms section exactly as "Explanation Terms" - do not rename it.
 
 **Suggested Response**
 Draft a professional, empathetic reply that the support agent can send directly to the customer.
@@ -74,7 +80,7 @@ def _make_tools(category_model, priority_model) -> list:
     def check_escalation(priority: str, ticket_text: str) -> str:
         """Check whether the ticket requires urgent escalation to senior staff."""
         return (
-            "Escalation required — route to senior staff immediately."
+            "Escalation required - route to senior staff immediately."
             if escalation_required(priority, ticket_text)
             else "No escalation required."
         )
@@ -89,22 +95,39 @@ def _make_tools(category_model, priority_model) -> list:
     return [classify_category, classify_priority, get_recommended_team, check_escalation, get_explanation_terms]
 
 
-def create_chat_session(category_model, priority_model, api_key: str | None = None) -> tuple:
+def create_chat_session(
+    category_model,
+    priority_model,
+    api_key: str | None = None,
+    use_fallback: bool = False,
+) -> tuple:
     """Create a Gemini chat session with the four ML pipeline tools bound."""
     client = genai.Client(api_key=_resolve_key(api_key))
     tool_functions = _make_tools(category_model, priority_model)
     tool_map = {fn.__name__: fn for fn in tool_functions}
-    chat = client.chats.create(
-        model=GEMINI_MODEL,
-        config=types.GenerateContentConfig(
-            system_instruction=_SYSTEM_PROMPT,
-            tools=tool_functions,
-            automatic_function_calling=types.AutomaticFunctionCallingConfig(
-                disable=True,
-            ),
-        ),
+    model = GEMINI_MODEL_FALLBACK if use_fallback else GEMINI_MODEL
+    config = types.GenerateContentConfig(
+        system_instruction=_SYSTEM_PROMPT,
+        tools=tool_functions,
+        automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
     )
+    try:
+        chat = client.chats.create(model=model, config=config)
+    except Exception as exc:
+        if not _is_unavailable(exc) or use_fallback:
+            raise
+        chat = client.chats.create(model=GEMINI_MODEL_FALLBACK, config=config)
     return client, chat, tool_map
+
+
+def validate_api_key(api_key: str) -> bool:
+    """Check if an API key is valid with a lightweight models list call."""
+    try:
+        client = genai.Client(api_key=api_key)
+        next(iter(client.models.list()), None)
+        return True
+    except Exception:
+        return False
 
 
 def send_message(chat, tool_map: dict, message: str) -> str:
@@ -178,5 +201,10 @@ def analyse_batch(
     prompt = _BATCH_SUMMARY_PROMPT.format(summary=summary_text)
 
     client = genai.Client(api_key=_resolve_key(api_key))
-    response = client.models.generate_content(model=GEMINI_MODEL, contents=prompt)
+    try:
+        response = client.models.generate_content(model=GEMINI_MODEL, contents=prompt)
+    except Exception as exc:
+        if not _is_unavailable(exc):
+            raise
+        response = client.models.generate_content(model=GEMINI_MODEL_FALLBACK, contents=prompt)
     return df, response.text
