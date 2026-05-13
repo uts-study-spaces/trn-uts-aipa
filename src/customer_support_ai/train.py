@@ -21,33 +21,52 @@ from .data_preprocessing import (
     make_train_validation_test_split,
 )
 from .evaluate import evaluate_predictions, save_confusion_matrix
+from .vectorizers import Top2VecTransformer, Word2VecTransformer
 
 
-def build_models() -> dict[str, Pipeline]:
+def get_vectorizer(vectorizer_type: str):
+    """Return the requested vectorizer instance."""
+    if vectorizer_type == "tfidf":
+        return TfidfVectorizer(ngram_range=(1, 2), min_df=2, max_features=30000)
+    elif vectorizer_type == "word2vec":
+        return Word2VecTransformer()
+    elif vectorizer_type == "top2vec":
+        return Top2VecTransformer()
+    else:
+        raise ValueError(f"Unknown vectorizer type: {vectorizer_type}")
+
+
+def build_models(vectorizer_type: str = "tfidf") -> dict[str, Pipeline]:
     """Keep models simple and explainable for assignment reporting."""
-    return {
+    
+    models = {
         "logistic_regression": Pipeline(
             [
-                ("tfidf", TfidfVectorizer(ngram_range=(1, 2), min_df=2, max_features=30000)),
+                ("vectorizer", get_vectorizer(vectorizer_type)),
                 ("model", LogisticRegression(max_iter=1000, class_weight="balanced")),
             ]
         ),
         "linear_svm": Pipeline(
             [
-                ("tfidf", TfidfVectorizer(ngram_range=(1, 2), min_df=2, max_features=30000)),
+                ("vectorizer", get_vectorizer(vectorizer_type)),
                 ("model", LinearSVC(class_weight="balanced")),
             ]
         ),
-        "naive_bayes": Pipeline(
+    }
+    
+    # Naive Bayes doesn't work with negative values from embeddings
+    if vectorizer_type == "tfidf":
+        models["naive_bayes"] = Pipeline(
             [
-                ("tfidf", TfidfVectorizer(ngram_range=(1, 2), min_df=2, max_features=30000)),
+                ("vectorizer", get_vectorizer(vectorizer_type)),
                 ("model", MultinomialNB()),
             ]
-        ),
-    }
+        )
+        
+    return models
 
 
-def train_task(frame: pd.DataFrame, target_column: str, task: str) -> list[dict]:
+def train_task(frame: pd.DataFrame, target_column: str, task: str, vectorizer_type: str = "tfidf") -> list[dict]:
     """Train candidates on train, select on validation, report final test performance."""
     train, validation, test = make_train_validation_test_split(frame, target_column)
     results = []
@@ -56,7 +75,7 @@ def train_task(frame: pd.DataFrame, target_column: str, task: str) -> list[dict]
     best_name = None
     best_macro_f1 = -1.0
 
-    for name, model in build_models().items():
+    for name, model in build_models(vectorizer_type).items():
         model.fit(train["model_text"], train[target_column])
         validation_predictions = model.predict(validation["model_text"])
         validation_result = evaluate_predictions(
@@ -104,6 +123,12 @@ def main() -> None:
         default=None,
         help="Optional path to one CSV file. Leave blank to load the three compatible Kaggle CSVs.",
     )
+    parser.add_argument(
+        "--vectorizer",
+        choices=["tfidf", "word2vec", "top2vec"],
+        default="tfidf",
+        help="Text representation method to use.",
+    )
     args = parser.parse_args()
 
     MODELS_DIR.mkdir(exist_ok=True)
@@ -124,6 +149,7 @@ def main() -> None:
         "excluded_leakage_columns": frame.attrs.get("leakage_columns", []),
         "category_target": category_column,
         "priority_target": priority_column,
+        "vectorizer_type": args.vectorizer,
     }
     (RESULTS_DIR / "dataset_profile.json").write_text(
         json.dumps(profile, indent=2),
@@ -131,8 +157,8 @@ def main() -> None:
     )
 
     all_results = []
-    all_results.extend(train_task(frame, category_column, "category"))
-    all_results.extend(train_task(frame, priority_column, "priority"))
+    all_results.extend(train_task(frame, category_column, "category", args.vectorizer))
+    all_results.extend(train_task(frame, priority_column, "priority", args.vectorizer))
 
     metrics = pd.DataFrame(
         [

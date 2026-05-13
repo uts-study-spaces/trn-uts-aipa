@@ -610,11 +610,12 @@ def overview_tab(profile: dict, metrics: pd.DataFrame) -> None:
     best_macro = test_rows["macro_f1"].max() if not test_rows.empty else 0
 
     st.write("")
-    c1, c2, c3, c4 = st.columns(4)
+    c1, c2, c3, c4, c5 = st.columns(5)
     c1.metric("Usable tickets", f"{rows:,}")
     c2.metric("Compatible CSVs", files_used)
     c3.metric("Duplicates removed", f"{duplicates:,}")
     c4.metric("Best test macro F1", f"{best_macro:.3f}" if best_macro else "N/A")
+    c5.metric("Vectorizer", profile.get("vectorizer_type", "tfidf").upper())
 
     st.markdown("### AI Workflow")
     render_workflow()
