@@ -66,14 +66,11 @@ Submission date & 16 May 2026\\
 \vspace*{1cm}
 \end{titlepage}
 
-\tableofcontents
-\newpage
-
 \section{Executive Summary}
 \subsection{Overview of the Project}
-Ticket Routing Intelligence is an AI decision-support system for customer support ticket triage. The system analyses a customer ticket and returns five outputs: predicted queue/category, predicted priority, recommended support team, escalation flag, short summary, and explanation terms. The aim is not to replace human agents. The aim is to provide a structured first-pass recommendation so agents can review tickets faster and more consistently.
+Ticket Routing Intelligence is an AI decision-support system for customer support ticket triage. It analyses a ticket and returns predicted queue/category, priority, recommended team, escalation flag, summary, and explanation terms. The aim is not to replace agents, but to provide a structured first-pass recommendation for faster and more consistent review.
 
-The implementation uses the Kaggle Multilingual Customer Support Tickets dataset. Five CSV files were audited. Three compatible multilingual files were merged, while two German-normalized files were excluded because their queue labels used a different taxonomy. After deduplication and filtering, the modelling dataset contains 44,275 usable tickets.
+The implementation uses the Kaggle Multilingual Customer Support Tickets dataset. Five CSV files were audited; three compatible multilingual files were merged and two German-normalized files were excluded because they used a different queue taxonomy. After deduplication and filtering, the modelling dataset contains 44,275 usable tickets.
 
 \subsection{Objectives}
 The project objectives are:
@@ -88,25 +85,25 @@ The project objectives are:
 \end{itemize}
 
 \subsection{Key Findings}
-The selected model is TF-IDF with Linear SVM for both prediction tasks. On the held-out test set, it reached macro F1 of 0.525 for queue/category prediction and 0.568 for priority prediction. Billing and Payments was the strongest category with F1 around 0.779, and high priority reached F1 around 0.624. These results are useful for first-pass triage, but they do not support full automation. This finding supports a human-in-the-loop design.
+The selected model is TF-IDF with Linear SVM for both tasks. On the held-out test set, it reached macro F1 of 0.525 for queue/category and 0.568 for priority. Billing and Payments was the strongest category, with F1 around 0.779. High priority reached F1 around 0.624. These results support first-pass triage, not full automation, so human review remains necessary.
 
-An optional sampled transformer-embedding benchmark was also implemented using multilingual MiniLM sentence embeddings and Logistic Regression. It reached sampled macro F1 of 0.235 for category and 0.350 for priority. In the current setup, transformer embeddings did not outperform the full-data TF-IDF Linear SVM pipeline. This result is useful because it shows that a more complex AI representation is not automatically better without tuning, larger samples, and careful validation.
+An optional transformer-embedding benchmark used multilingual MiniLM sentence embeddings and Logistic Regression. It reached sampled macro F1 of 0.235 for category and 0.350 for priority, below the full-data TF-IDF Linear SVM pipeline. This shows that a more complex representation is not automatically better without tuning, larger samples, and careful validation.
 
 \section{Introduction}
 \subsection{Background and Context}
-Customer support teams receive large volumes of unstructured tickets. These tickets can mention billing problems, product questions, account access, service outages, returns, security concerns, or general requests. In real operations, first-pass triage is important because it decides which team receives the ticket and how fast it is reviewed. Manual triage can be slow and inconsistent, especially when tickets are multilingual or when urgent words are hidden inside long messages.
+Customer support teams receive many unstructured tickets about billing, product questions, access, outages, returns, security, and general requests. First-pass triage is important because it decides the queue, urgency, and review path. Manual triage can be slow and inconsistent, especially for multilingual tickets or urgent cases hidden in long text.
 
 \subsection{Problem Statement}
-The problem is slow and inconsistent ticket triage. A support ticket must be mapped to a queue, assigned a priority, checked for escalation risk, and routed to the correct team. If the first decision is wrong, customers wait longer and urgent cases can be missed. This project builds an AI prototype that assists this decision while keeping humans responsible for final action.
+The problem is slow and inconsistent ticket triage. A ticket must be mapped to a queue, assigned priority, checked for escalation risk, and routed to the correct team. If the first decision is wrong, customers wait longer and urgent cases may be missed. This project assists the decision while keeping humans responsible for final action.
 
 \subsection{Significance and Impact}
-The system can reduce manual work by giving agents an initial recommendation. It can also improve transparency by showing explanation terms and escalation reasons. This is important because a support team should not rely on an unexplained prediction. The prototype also supports batch upload, so a team can analyse several tickets from a CSV or Excel file.
+The system can reduce manual work by giving agents an initial recommendation. It also improves transparency by showing explanation terms and escalation reasons. The prototype supports single-ticket analysis and batch upload from CSV or Excel files.
 
 \subsection{Challenges and Constraints}
-The main constraints are dataset imbalance, multilingual text, overlapping category language, and privacy. Some categories share similar words, such as product support and technical support. Some languages have fewer examples, which affects fairness. Also, ticket text may include personal information, so the summary function masks obvious email addresses and phone numbers. Finally, the project must stay reproducible for an academic assignment, so the deployed demo uses simple and explainable methods instead of external LLM services.
+The main constraints are dataset imbalance, multilingual text, overlapping categories, and privacy. Some languages have fewer examples, and ticket text may include personal information. The summary function masks obvious emails and phone numbers. For reproducibility and privacy, the deployed demo uses simple explainable methods instead of external LLM services.
 
 \subsection{Project Objectives and Scope}
-The project scope is a working prototype and reproducible pipeline. It includes notebooks, reusable Python modules, saved metrics, charts, and a Streamlit app. It does not claim production readiness. A real deployment would need ticketing-system integration, access control, monitoring, retraining workflows, stronger privacy redaction, and testing on company-specific data.
+The scope is a working prototype and reproducible pipeline with notebooks, Python modules, metrics, charts, and a Streamlit app. It is not production-ready. Production use would require ticketing-system integration, access control, monitoring, retraining, stronger privacy redaction, and testing on company data.
 
 \section{Theoretical Justification}
 \subsection{Overview of AI Methods Used}
@@ -122,24 +119,24 @@ The solution combines several AI methods:
 \end{itemize}
 
 \subsection{Theoretical Foundations}
-TF-IDF gives high weight to words that are frequent in one document but less frequent across the full corpus. This is useful for support tickets because terms such as ``invoice'', ``refund'', ``outage'', or ``password'' can be strong signals for a queue. Linear SVM is suitable for sparse, high-dimensional text features because it learns a separating boundary between classes and often performs well for text classification. Logistic Regression gives a strong linear baseline with probabilistic interpretation, while Naive Bayes is a simple probabilistic baseline that is often used for text.
+TF-IDF gives high weight to terms that are frequent in one document but less frequent across the corpus (Ramos, 2003). This is useful because words such as ``invoice'', ``refund'', ``outage'', or ``password'' can signal a queue. Linear SVM is suitable for sparse, high-dimensional text because it learns a separating boundary between classes (Cortes and Vapnik, 1995; Joachims, 1998). Logistic Regression provides a strong linear baseline, while Naive Bayes is a simple probabilistic baseline for text (McCallum and Nigam, 1998).
 
-The rule-based layer represents operational knowledge. For example, if a ticket includes words such as ``unauthorised'', ``fraud'', or ``breach'', the app can recommend a security team or escalation review even if the predicted queue is not security. This combination is important because ML predictions and business rules solve different parts of the triage task.
+The rule-based layer represents operational knowledge. For example, words such as ``unauthorised'', ``fraud'', or ``breach'' can trigger security routing or escalation even when the predicted queue is different. This is structural knowledge representation: ML predicts labels, while rules encode business risk.
 
 \subsection{Justification of Selected Methods}
-Linear SVM was selected because it had the best validation macro F1 for both queue and priority. It also keeps the system lightweight, fast, and explainable. The app can show influential TF-IDF terms, which helps agents understand the prediction. This approach is more suitable for the current prototype than a heavier model that is harder to run and explain.
+Linear SVM was selected because it had the best validation macro F1 for both queue and priority. It is lightweight, fast, and explainable because the app can show influential TF-IDF terms. This is more suitable for the current prototype than a heavier model that is harder to run and explain.
 
-The transformer benchmark was kept separate from live prediction. It provides a semantic multilingual comparison, but it used a sample of 2,500 tickets and performed below the current model. Therefore, it is report evidence and future-work evidence, not the deployed prediction path.
+The transformer benchmark was kept separate from live prediction. It provides a semantic multilingual comparison using sentence embeddings (Reimers and Gurevych, 2019), but it used a sample of 2,500 tickets and performed below the current model. Therefore, it is report and future-work evidence, not the deployed prediction path.
 
 \subsection{Transformer Benchmark Rationale}
-The transformer benchmark used the multilingual MiniLM sentence-transformer model to encode ticket text as dense multilingual sentence embeddings. A Logistic Regression classifier was then trained on those embeddings for the same two tasks: category prediction and priority prediction. This experiment was added because transformer embeddings are designed to capture semantic similarity across languages, which is relevant for a multilingual ticket dataset. However, it was intentionally run as a sampled benchmark because transformer inference is heavier than TF-IDF and was not required for the live demo.
+The transformer benchmark used multilingual MiniLM sentence embeddings and Logistic Regression for category and priority prediction. This experiment addresses SLO4 by testing a modern deep-learning representation related to transformer, Generative AI, and LLM methods. MLP, reinforcement learning, and LLM assistant ideas were discussed by the group, but only the transformer benchmark is present in the current main repository. The live demo keeps TF-IDF because it is faster and stronger in the measured results.
 
 \subsection{Related Work / Literature Support}
-The project follows common NLP classification practice: text normalisation, TF-IDF feature extraction, train/validation/test splitting, model comparison, and held-out evaluation. The responsible AI design follows principles of human oversight, leakage control, transparency, and privacy minimisation.
+The project follows standard NLP classification practice: text normalisation, TF-IDF feature extraction, train/validation/test splitting, model comparison, and held-out evaluation. The responsible AI design follows human oversight, leakage control, transparency, and privacy minimisation (Ribeiro, Singh and Guestrin, 2016; Jobin, Ienca and Vayena, 2019).
 
 \section{Workflow and Methodology}
 \subsection{System Architecture Overview}
-The workflow has seven main stages: audit data, prepare text, build features, train models, evaluate results, route tickets, and explain outputs. The Streamlit app presents this workflow in the Overview tab and provides prediction tools in the Try Solution tab.
+The workflow has seven stages: audit data, prepare text, build features, train models, evaluate results, route tickets, and explain outputs. Streamlit presents this workflow in the Overview tab and provides prediction tools in the Try Solution tab.
 
 \begin{figure}[H]
 \centering
@@ -154,12 +151,12 @@ The dataset was downloaded from Kaggle. The compatible files were:
   \item \texttt{dataset-tickets-multi-lang-4-20k.csv}
   \item \texttt{dataset-tickets-multi-lang3-4k.csv}
 \end{itemize}
-The two German-normalized files were audited but excluded from the main supervised model because their queue/category taxonomy was different.
+The two German-normalized files were audited but excluded because their queue taxonomy was different.
 
-The pipeline normalises column names, combines subject and body into \texttt{ticket\_text}, removes duplicate subject-body pairs, and removes rows without usable text. It excludes the \texttt{answer} field because this field is written after a support agent responds. Using it would create target leakage because the information would not be available at ticket creation time.
+The pipeline normalises column names, combines subject and body into \texttt{ticket\_text}, removes duplicate subject-body pairs, and removes rows without usable text. It excludes \texttt{answer} because that field is written after the agent responds, so using it would create target leakage.
 
 \subsection{Feature Engineering}
-The main feature is \texttt{model\_text}. It combines cleaned ticket text with safe metadata tokens such as type, language, and tags. The cleaning process lowercases text, masks emails and phone numbers, replaces long numbers, removes URLs, and keeps simple alphanumeric tokens. TF-IDF uses unigrams and bigrams with a maximum of 30,000 features.
+The main feature is \texttt{model\_text}, which combines cleaned ticket text with safe metadata tokens such as type, language, and tags. Cleaning lowercases text, masks emails and phone numbers, replaces long numbers, removes URLs, and keeps simple alphanumeric tokens. TF-IDF uses unigrams and bigrams with up to 30,000 features.
 
 \subsection{Model Design and Algorithmic Approach}
 The project trains two separate supervised tasks:
@@ -167,20 +164,20 @@ The project trains two separate supervised tasks:
   \item queue/category prediction using the dataset queue label;
   \item priority prediction using the dataset priority label.
 \end{itemize}
-For each task, three models were compared: Logistic Regression, Multinomial Naive Bayes, and Linear SVM. The data was split into training, validation, and test sets. Candidate models were selected using validation macro F1. The selected model was retrained on training plus validation data, then evaluated on the held-out test set.
+For each task, Logistic Regression, Multinomial Naive Bayes, and Linear SVM were compared. The data was split into training, validation, and test sets. Models were selected using validation macro F1, retrained on training plus validation data, and evaluated on the held-out test set.
 
 \subsection{Integration of AI Paradigms}
-The final prototype integrates supervised learning, probabilistic baseline modelling, symbolic rules, explainability, template summarisation, and transformer comparison. This satisfies the requirement to show more than one AI paradigm. However, only the stable and explainable TF-IDF Linear SVM pipeline is used for live predictions.
+The final prototype integrates supervised learning, a probabilistic baseline, symbolic rules, explainability, template summarisation, and transformer comparison. This shows multiple AI paradigms. Only the stable TF-IDF Linear SVM pipeline is used for live predictions.
 
 \subsection{Design Decisions vs Implementation Details}
-A key design decision was to prioritise reproducibility and explainability. The app does not call an external LLM. The summary is template-based, and the explanation is based on TF-IDF terms. This choice reduces cost, privacy risk, and dependency risk. Another decision was to display transformer benchmark results in the app Overview tab, but not to use them for routing.
+A key design decision was to prioritise reproducibility and explainability. The app does not call an external LLM; summaries are template-based and explanations use TF-IDF terms. This reduces cost, privacy risk, and dependency risk. Transformer results are shown in the Overview tab but are not used for routing.
 
 \section{Empirical Analysis and Results}
 \subsection{Experimental Setup}
-The final modelling frame contains 44,275 rows. The pipeline uses a train/validation/test approach with stratification when possible. The same random seed is used for reproducibility. Metrics are saved in the \texttt{results/} folder and charts are saved in \texttt{report\_assets/}.
+The final modelling frame contains 44,275 rows. The pipeline uses train/validation/test splitting with stratification when possible and a fixed random seed for reproducibility. Metrics are saved in \texttt{results/}; charts are saved in \texttt{report\_assets/}.
 
 \subsection{Dataset Description}
-The data includes multilingual support tickets across English, German, Spanish, French, and Portuguese. English and German dominate the dataset. The dataset includes multiple support queues, including Billing and Payments, Product Support, Technical Support, Customer Service, Service Outages and Maintenance, Returns and Exchanges, Sales and Pre-Sales, Human Resources, and General Inquiry.
+The data includes English, German, Spanish, French, and Portuguese tickets. English and German dominate the dataset. Labels include Billing and Payments, Product Support, Technical Support, Customer Service, Service Outages and Maintenance, Returns and Exchanges, Sales and Pre-Sales, Human Resources, and General Inquiry.
 
 \begin{figure}[H]
 \centering
@@ -215,7 +212,7 @@ The data includes multilingual support tickets across English, German, Spanish, 
 \end{figure}
 
 \subsection{Evaluation Metrics}
-The project reports accuracy, macro precision, macro recall, macro F1, and weighted F1. Macro F1 is the main model-selection metric because it gives equal importance to each class. This is important for imbalanced datasets because a model should not only optimise performance on majority classes.
+The project reports accuracy, macro precision, macro recall, macro F1, and weighted F1. Macro F1 is the main selection metric because it gives equal importance to each class, which is important for imbalanced data.
 
 \subsection{Results}
 \begin{table}[H]
@@ -242,7 +239,7 @@ Priority & Transformer + LR & Sampled & 0.357 & 0.359 & 0.359 & 0.350\\
 \end{figure}
 
 \subsection{Transformer Benchmark Results}
-The optional transformer benchmark was run on a reproducible sample of 2,500 tickets. The dense embeddings were generated with multilingual MiniLM and classified with Logistic Regression. The category model reached 0.235 sampled macro F1, and the priority model reached 0.350 sampled macro F1. These results were lower than the full-data TF-IDF Linear SVM results: 0.525 macro F1 for category and 0.568 macro F1 for priority.
+The optional transformer benchmark used a reproducible sample of 2,500 tickets. Multilingual MiniLM embeddings were classified with Logistic Regression. Category reached 0.235 sampled macro F1 and priority reached 0.350, below the full-data TF-IDF Linear SVM results of 0.525 and 0.568.
 
 \begin{table}[H]
 \centering
@@ -261,12 +258,12 @@ Priority & Multilingual MiniLM embeddings + Logistic Regression, sampled test & 
 \caption{Direct report comparison between the deployed TF-IDF model and the optional transformer benchmark.}
 \end{table}
 
-The transformer result does not mean that transformers are unsuitable for this problem. It means that this specific sampled and lightly tuned experiment did not outperform the simpler pipeline. A stronger transformer setup would need more data, careful class balancing, hyperparameter tuning, and possibly a classifier better matched to embeddings. For the current assignment, the result supports a responsible technical choice: keep Linear SVM for live prediction and discuss transformer embeddings as validated future work.
+This does not mean transformers are unsuitable. It means this sampled and lightly tuned experiment did not outperform the simpler pipeline. A stronger setup would need more data, class balancing, hyperparameter tuning, and possibly a better classifier. For this assignment, the result supports keeping Linear SVM for live prediction and discussing transformers as validated future work.
 
 \subsection{Result Interpretation and Discussion}
-The results show useful predictive signal but also important limitations. Billing and Payments is the strongest category because billing tickets have distinctive vocabulary. Service Outages and Maintenance also performs relatively well. Product Support, IT Support, and Customer Service are harder because their wording overlaps. Priority prediction performs slightly better than category prediction, but low priority remains weaker than high and medium.
+The results show useful predictive signal but also limitations. Billing and Payments is strongest because billing tickets have distinctive vocabulary. Service Outages and Maintenance also performs well. Product Support, IT Support, and Customer Service are harder because wording overlaps. Priority prediction is slightly stronger than category prediction, but low priority remains weaker than high and medium.
 
-Language analysis shows a performance gap. English category macro F1 is 0.604, while German category macro F1 is 0.400. This suggests that future work should improve multilingual preprocessing, use more balanced training data, or tune multilingual embeddings more carefully.
+Language analysis shows a performance gap: English category macro F1 is 0.604, while German category macro F1 is 0.400. Future work should improve multilingual preprocessing, use more balanced data, or tune multilingual embeddings more carefully.
 
 \begin{figure}[H]
 \centering
@@ -286,19 +283,19 @@ Language analysis shows a performance gap. English category macro F1 is 0.604, w
 
 \section{Critical Reflection}
 \subsection{Limitations of the Approach}
-The first limitation is moderate macro F1. The model is useful for support, but not for automatic final decisions. The second limitation is language imbalance. The third limitation is the training/inference mismatch: training uses text plus safe metadata, while a manually pasted ticket in the app mainly provides text. Batch files can include richer columns, but single-ticket mode is simpler. The fourth limitation is privacy masking. The app masks obvious emails and phone numbers, but it does not detect all personal information.
+The main limitations are moderate macro F1, language imbalance, training/inference mismatch, and limited privacy masking. Training uses text plus safe metadata, while manually pasted tickets mainly provide text. Batch files can include richer columns. The app masks obvious emails and phone numbers, but it does not detect all personal information.
 
 \subsection{Failure Cases}
-Some tickets are ambiguous. A security-related issue may still mention billing details and be predicted as Billing and Payments. In that case, the model queue and the recommended team can be different. This is expected because queue prediction is learned from labels, while team recommendation also uses security terms. This is a useful design feature, but it must be explained to users.
+Some tickets are ambiguous. A security issue may mention billing details and be predicted as Billing and Payments. The recommended team can still be Security Team because routing also uses security terms. This is useful, but it must be explained to users.
 
 \subsection{Trade-offs}
-The main trade-off is explainability versus complexity. TF-IDF Linear SVM is simple, fast, and explainable. Transformer embeddings can capture deeper semantic meaning, but in this sampled benchmark they performed worse and required heavier dependencies. LLM summarisation could create more natural summaries, but it would add privacy, cost, and reproducibility concerns.
+The main trade-off is explainability versus complexity. TF-IDF Linear SVM is simple, fast, and explainable. Transformer embeddings can capture deeper semantic meaning, but they performed worse in the sampled benchmark and require heavier dependencies. LLM summarisation could produce richer text, but it adds privacy, cost, and reproducibility risks.
 
 \subsection{Scalability and Computational Constraints}
-The current prototype runs locally and uses saved model files. A production version would need an API, authentication, logging, monitoring, drift detection, retraining, and integration with a ticketing platform. The transformer benchmark was limited by sample size and compute. Larger experiments may need better hardware or cloud resources.
+The prototype runs locally with saved model files. Production use would need an API, authentication, logging, monitoring, drift detection, retraining, and ticketing-platform integration. Larger transformer experiments may need better hardware or cloud resources.
 
 \subsection{Alternative Methods and Improvements}
-Future work should include confidence calibration, active learning from agent corrections, Unicode-aware multilingual preprocessing, stronger PII redaction, SLA-aware escalation, and better multilingual transformer experiments. A text-only model could also reduce the training/inference mismatch for single-ticket mode.
+Future work should include confidence calibration, active learning from agent corrections, Unicode-aware preprocessing, stronger PII redaction, SLA-aware escalation, and better transformer experiments. A text-only model could reduce the single-ticket training/inference mismatch.
 
 \section{GitHub Repository}
 \subsection{Repository Link}
@@ -339,16 +336,16 @@ Optional transformer benchmark:
 
 \section{Conclusion}
 \subsection{Summary of Findings}
-This project built a working AI decision-support prototype for customer support triage. It uses a real multilingual dataset, reproducible preprocessing, supervised model comparison, held-out evaluation, routing rules, escalation logic, explanation terms, and a Streamlit dashboard.
+This project built an AI decision-support prototype for customer support triage. It uses a real multilingual dataset, reproducible preprocessing, supervised model comparison, held-out evaluation, routing rules, escalation logic, explanation terms, and a Streamlit dashboard.
 
 \subsection{Key Insights}
-The strongest current approach is TF-IDF with Linear SVM. It gives moderate but useful performance and supports explainability. The results are strongest where categories have clear vocabulary and weaker where categories overlap or language representation is limited. The optional transformer benchmark did not improve performance in the current setup, so the final design keeps the simpler model for live predictions.
+The strongest current approach is TF-IDF with Linear SVM. It gives moderate but useful performance and supports explainability. Results are strongest where categories have clear vocabulary and weaker where categories overlap or language representation is limited. The transformer benchmark did not improve performance, so the final design keeps the simpler model for live predictions.
 
 \subsection{Future Work}
-Future work should improve multilingual handling, add confidence scores, learn from human corrections, strengthen privacy redaction, and test more transformer or neural methods under fairer conditions. Production deployment would also need monitoring, data governance, and integration with support systems.
+Future work should improve multilingual handling, add confidence scores, learn from human corrections, strengthen privacy redaction, and test transformer, multi-layer network, reinforcement learning, or LLM-based methods under fairer conditions. Production deployment would also need monitoring, data governance, and support-system integration.
 
 \section{Individual Contributions}
-The table below summarises the individual contributions using repository history, presentation artefacts, and the WhatsApp discussion. Contributions that were discussed but are not present in the current main repository are marked as pending evidence.
+The table below summarises individual contributions using repository history, presentation artefacts, and WhatsApp evidence. Discussed work not present in the current main repository is marked as pending evidence.
 
 \small
 \begin{longtable}{>{\raggedright\arraybackslash}p{0.18\linewidth} >{\raggedright\arraybackslash}p{0.39\linewidth} >{\raggedright\arraybackslash}p{0.33\linewidth}}
@@ -360,17 +357,17 @@ The table below summarises the individual contributions using repository history
 \textbf{Member} & \textbf{Confirmed contribution in repository or local artefacts} & \textbf{Pending contribution evidence}\\
 \midrule
 \endhead
-Tumadhir Alsharhan \newline ID: 25605852 & Led the development of the main customer support AI pipeline, including notebooks 01--05, reusable Python modules, Streamlit app, README, run checklist, result files, charts, and demo examples. Amal Maawadh supported these tasks through project planning and presentation/report framing. Tumadhir also prepared and updated group presentation material and Q\&A guidance. & Confirmed in repository history, WhatsApp evidence, and presentation artefacts.\\
+Tumadhir Alsharhan \newline ID: 25605852 & Led the main AI pipeline: notebooks 01--05, reusable modules, Streamlit app, README, checklist, result files, charts, and demo examples. Amal supported planning and report/presentation framing. Tumadhir also prepared presentation and Q\&A material. & Confirmed in repository history, WhatsApp evidence, and presentation artefacts.\\
 \addlinespace
-Mario Rubiano \newline ID: 24900627 & Reviewed the codebase, notebooks, app, outputs, and assignment requirements. Added executed notebook evidence and a status/gap report. Implemented the optional transformer-embedding benchmark, result files, notebook 06, transformer dependency file, README/checklist updates, and Streamlit display of transformer benchmark results. Prepared the Speaker 6 responsible AI and future work content. & Confirmed in repository history and presentation artefacts.\\
+Mario Rubiano \newline ID: 24900627 & Reviewed code, notebooks, app, outputs, and requirements. Added executed notebook evidence and a status/gap report. Implemented the transformer benchmark, notebook 06, result files, dependency file, documentation updates, and Streamlit benchmark display. Prepared responsible AI/future work content. & Confirmed in repository history and presentation artefacts.\\
 \addlinespace
-Andres Ethorimn \newline ID: 26029165 & Created the original repository/template, shared GitHub access, maintained the main branch, merged pull requests, cleaned data and presentation files from main, restored result artefacts, and reviewed Mario's PR before adding features to main. Presented empirical results in the slide notes. & Confirmed in repository history, WhatsApp evidence, and presentation artefacts.\\
+Andres Ethorimn \newline ID: 26029165 & Created the repository/template, shared GitHub access, maintained main, merged pull requests, cleaned large files, restored result artefacts, reviewed Mario's PR, and presented empirical results in slide notes. & Confirmed in repository history, WhatsApp evidence, and presentation artefacts.\\
 \addlinespace
-Amal Maawadh \newline ID: 25605864 & Supported Tumadhir in the main project planning and implementation direction. Shared a detailed implementation plan covering the dataset, AI workflow, models, evaluation metrics, demo features, and HD-level requirements. Drafted presentation content and speaker notes. Presentation artefacts show Amal as Speaker 1 for the project introduction and problem framing. & Confirmed by WhatsApp evidence and presentation artefacts.\\
+Amal Maawadh \newline ID: 25605864 & Supported Tumadhir in project planning and implementation direction. Shared the implementation plan covering dataset, workflow, models, metrics, demo features, and HD requirements. Drafted presentation content and notes, and presented the introduction/problem framing. & Confirmed by WhatsApp evidence and presentation artefacts.\\
 \addlinespace
-Laura Pacheco \newline ID: 25940875 & Presentation artefacts show Laura as Speaker 2 for the solution overview, dataset explanation, and leakage-control explanation. WhatsApp evidence also indicates that Laura explored EDA responsibilities and later experimented with an MLP priority model and an RL routing agent. & \pending{Laura Pacheco: the MLP Neural Network and RL Routing Agent are mentioned in chat, but no corresponding code or results are present in current main repository content. Add branch output or keep this item as future/pending work.}\\
+Laura Pacheco \newline ID: 25940875 & Presented the solution overview, dataset explanation, and leakage-control explanation. WhatsApp evidence indicates EDA involvement and experimentation with an MLP priority model and reinforcement learning routing agent. & \pending{MLP Neural Network and reinforcement learning routing agent are mentioned in chat, but code/results are not present in current main repository content. Add branch output or keep as future work.}\\
 \addlinespace
-Carl Lazarus \newline ID: 12043485 & Presentation artefacts show Carl as Speaker 3 for the AI methods section. WhatsApp evidence also indicates that Carl added a demo slide/video and refined the demo wording for the presentation. & \pending{Carl Lazarus: the LLM AI assistant for ticket submission is mentioned as branch work in chat, but no corresponding code is present in current main repository content. Add branch output or keep this item as future/pending work.}\\
+Carl Lazarus \newline ID: 12043485 & Presented the AI methods section. WhatsApp evidence indicates that Carl added a demo slide/video and refined the demo wording. & \pending{The LLM AI assistant for ticket submission is mentioned as branch work, but code is not present in current main repository content. Add branch output or keep as future work.}\\
 \bottomrule
 \end{longtable}
 \normalsize
@@ -382,6 +379,8 @@ Carl Lazarus \newline ID: 12043485 & Presentation artefacts show Carl as Speaker
   \item McCallum, A. and Nigam, K. (1998). A comparison of event models for Naive Bayes text classification. \textit{AAAI Workshop on Learning for Text Categorization}.
   \item Ramos, J. (2003). Using TF-IDF to determine word relevance in document queries. \textit{Proceedings of the First Instructional Conference on Machine Learning}.
   \item Reimers, N. and Gurevych, I. (2019). Sentence-BERT: Sentence embeddings using Siamese BERT-networks. \textit{EMNLP-IJCNLP}.
+  \item Ribeiro, M. T., Singh, S. and Guestrin, C. (2016). Why should I trust you? Explaining the predictions of any classifier. \textit{KDD}.
+  \item Jobin, A., Ienca, M. and Vayena, E. (2019). The global landscape of AI ethics guidelines. \textit{Nature Machine Intelligence}, 1, 389--399.
   \item scikit-learn developers. (2026). scikit-learn: Machine Learning in Python. \url{https://scikit-learn.org/}
   \item Streamlit developers. (2026). Streamlit documentation. \url{https://docs.streamlit.io/}
   \item Kaggle. (2026). Multilingual Customer Support Tickets dataset. \url{https://www.kaggle.com/datasets/tobiasbueck/multilingual-customer-support-tickets}
