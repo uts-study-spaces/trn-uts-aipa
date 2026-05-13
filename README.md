@@ -1,6 +1,6 @@
 # Customer Support AI Implementation
 
-This repository contains the actual AI implementation for the Assessment 3 group project in Artificial Intelligence Principles and Applications at UTS. The system supports customer service teams by classifying support tickets, predicting priority, recommending a support team, summarising the issue, explaining key prediction terms, and flagging escalation risk.
+This repository contains the actual AI implementation for the Assessment 3 group project in Artificial Intelligence Principles and Applications at UTS. The system supports customer service teams by classifying support tickets, predicting priority, recommending a support team, summarising the issue, explaining key prediction terms, flagging escalation risk, and analysing small batches of tickets through the demo app.
 
 The Streamlit app is only the final user-facing interface. The main project work is the reproducible AI pipeline in `src/` and the staged analysis notebooks in `notebooks/`.
 
@@ -23,18 +23,19 @@ Customer support teams receive high volumes of tickets across account access, bi
 - Rule-based reasoning for routing and escalation.
 - Template-based summarisation with privacy masking.
 - Explainability using influential TF-IDF terms.
+- Streamlit interface with overview evidence, single-ticket prediction, batch upload, and downloadable batch predictions.
 - Report-ready metrics and confusion matrices.
 
 ## Repository Structure
 
 ```text
-app/                         Streamlit interface for final demonstration
+app/                         Streamlit interface for overview, single-ticket demo, and batch demo
 data/raw/                    Full Kaggle dataset location, not committed
 data/processed/              Generated model-ready dataset, not committed
-docs/                        Project plan and assignment notes
+docs/                        Project plan, run checklist, demo examples, and assignment notes
 models/                      Trained model files, not committed
-notebook/                    Existing exploratory notebook from the group
 notebooks/                   Clean staged notebooks for final workflow
+reports/                     Status report and executed notebook copies
 report_assets/               Generated charts for report and presentation
 results/                     Metrics, reports, and charts for report use
 src/customer_support_ai/     Reusable implementation code
@@ -173,7 +174,7 @@ This saves:
 - `results/transformer_embedding_benchmark.csv`
 - `results/transformer_embedding_benchmark.json`
 
-The benchmark is intentionally not integrated into Streamlit. It should be used as report evidence or future-work discussion, not as a replacement for the final demo model.
+The benchmark is not used for live ticket prediction. If the benchmark output files exist, Streamlit displays them in the Overview tab alongside the main TF-IDF model results so they can support report and presentation discussion.
 
 ## Run the Final Interface
 
@@ -183,7 +184,12 @@ After training the models:
 .\.venv\Scripts\streamlit.exe run app/streamlit_app.py
 ```
 
-The interface lets a user paste a support ticket and returns the predicted category, predicted priority, recommended team, summary, escalation flag, and explanation terms. Stable presentation examples are available in `docs/presentation_demo_examples.md`.
+The interface has two tabs:
+
+- `Overview`: shows dataset size, compatible CSV count, duplicates removed, best test macro F1, workflow, language/priority charts, final metrics, per-language and per-class results, and the optional transformer benchmark table/chart when available.
+- `Try Solution`: supports single-ticket analysis and batch upload. Single-ticket mode returns the predicted category, predicted priority, recommended team, summary, escalation flag, and explanation terms. Batch mode accepts CSV, XLSX, or XLS files with a ticket text column and analyses up to 200 rows, then offers a downloadable predictions CSV.
+
+Stable presentation examples are available in `docs/presentation_demo_examples.md`.
 
 ## Responsible AI Notes
 
@@ -197,4 +203,5 @@ This system is decision support, not full automation. It avoids using resolution
 - Current strongest model is Linear SVM for both queue and priority prediction.
 - Current modelling dataset has 44,275 usable rows after auditing five CSV files and deduplicating the three compatible files.
 - Report-ready metrics, classification reports, confusion matrices, extra evaluation tables, slide charts, and example success/failure cases have been regenerated.
+- Streamlit now includes an Overview evidence dashboard, a single-ticket demo, a batch upload workflow, dark report tables, Altair charts, and optional transformer benchmark display.
 - Group member names, student IDs, screenshots, and final contribution statements still need to be added before submission.

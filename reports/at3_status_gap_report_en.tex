@@ -35,14 +35,14 @@ This report is designed to help the group quickly understand what is complete, w
 
 \begin{enumerate}
   \item \textbf{Complete group details:} the updated presentation now includes Mario Rubiano, but it still shows \texttt{Student 6 ID 00000000}. Replace this placeholder in the slide deck and final report.
-  \item \textbf{Prepare the demo:} train the models locally, launch Streamlit, test the Security Incident example, and keep screenshots as backup.
+  \item \textbf{Prepare the demo:} train the models locally, launch Streamlit, test the Security Incident example, test the batch upload workflow, and keep screenshots as backup.
   \item \textbf{Finish the final report:} write the academic PDF of up to 3500 words with the GitHub link, references, metrics, limitations, and individual contributions.
-  \item \textbf{Avoid overclaiming:} describe LLMs and GenAI as future work. A small transformer-embedding benchmark now exists, but it is optional, sampled, and not part of the Streamlit app.
+  \item \textbf{Avoid overclaiming:} describe LLMs and GenAI as future work. A small transformer-embedding benchmark now exists, but it is optional, sampled, and only displayed as comparison evidence in the Streamlit Overview tab. It is not used for live ticket routing.
   \item \textbf{Fix or disclose technical limitations:} especially the mismatch between training with metadata and single-ticket inference using only text.
 \end{enumerate}
 
 \section{Overall Status}
-The project is in good shape for the oral presentation. It has a real-world problem, real dataset, NLP pipeline, model comparison, empirical evaluation, Streamlit app, slide deck, and speaker script. The work is not only software development: it includes supervised AI, a probabilistic baseline, symbolic rules, explainability, and template-based summarisation.
+The project is in good shape for the oral presentation. It has a real-world problem, real dataset, NLP pipeline, model comparison, empirical evaluation, Streamlit app, slide deck, and speaker script. The work is not only software development: it includes supervised AI, a probabilistic baseline, symbolic rules, explainability, template-based summarisation, optional transformer comparison evidence, and a demo workflow for both single-ticket and small batch triage.
 
 Most remaining work is academic finishing work: strengthen theoretical justification, document individual contributions, deepen critical reflection, verify references, and make reproducibility clearer for another machine.
 
@@ -62,7 +62,7 @@ Real-world problem and impact & \done & Report + presentation & \textbf{Frame as
 \addlinespace
 Real dataset and data governance & \done & Report + presentation & \textbf{Frame as evidence.} The project uses Kaggle Multilingual Customer Support Tickets, with 44,275 final tickets after deduplication. In the report, explain why only three compatible CSVs were merged and why the \texttt{answer} field was excluded to avoid target leakage. \\
 \addlinespace
-AI workflow and implementation & \done & Report + presentation & \textbf{Frame as evidence.} The repo includes notebooks 01--05, reusable modules in \texttt{src/customer\_support\_ai/}, model training, evaluation, report assets, and Streamlit. Use the workflow diagram in slides and describe the design decisions versus implementation details in the report. \\
+AI workflow and implementation & \done & Report + presentation & \textbf{Frame as evidence.} The repo includes notebooks 01--06, reusable modules in \texttt{src/customer\_support\_ai/}, model training, evaluation, report assets, optional transformer benchmark outputs, and Streamlit. Use the workflow diagram in slides and describe the design decisions versus implementation details in the report. \\
 \addlinespace
 Multiple AI paradigms & \partialstatus & Mainly report; brief slide mention & \textbf{Frame as partially strengthened.} Implemented paradigms include supervised NLP, probabilistic Naive Bayes baseline, symbolic routing/escalation rules, explainability, template summarisation, and an optional sampled multilingual transformer-embedding benchmark. For the presentation, mention this briefly as report evidence/time-permitting work; do not claim it replaces the app model. \\
 \addlinespace
@@ -117,13 +117,14 @@ Priority & 0.357 & 0.350 \\
 \end{tabular}
 \end{center}
 
-These sampled results do not outperform the current full-data TF-IDF + Linear SVM pipeline. The benchmark is still useful for AT3 because it provides a concrete semantic transformer-based comparison and supports a responsible conclusion: the deployed demo should remain with the more stable and explainable Linear SVM pipeline, while transformer embeddings can be discussed as future work requiring tuning, larger samples, and stronger validation.
+These sampled results do not outperform the current full-data TF-IDF + Linear SVM pipeline. The benchmark is still useful for AT3 because it provides a concrete semantic transformer-based comparison and supports a responsible conclusion: live predictions should remain with the more stable and explainable Linear SVM pipeline, while transformer embeddings can be shown as comparison evidence and discussed as future work requiring tuning, larger samples, and stronger validation.
 
 \section{Local Validation}
 The repository, application, brief, speaker script, and slide deck were reviewed. The notebooks were also executed locally.
 
 \begin{itemize}
   \item Streamlit responded correctly at \texttt{http://localhost:8501}.
+  \item The Streamlit app now includes an Overview evidence dashboard, single-ticket prediction, batch upload for CSV/XLSX/XLS files, downloadable batch predictions, dark tables, Altair charts, and optional transformer benchmark display.
   \item Notebooks 01 to 05 executed successfully using the \texttt{python3} kernel.
   \item The first notebook execution attempt failed because the notebooks expected a kernel named \texttt{customer-support-ai}. This should be fixed or documented.
   \item Executed notebook copies were saved under \texttt{reports/notebook\_execution/}.
@@ -137,13 +138,13 @@ These improvements are small enough to implement quickly and can improve clarity
 \textbf{Improvement} & \textbf{Effort} & \textbf{Impact} \\
 \midrule
 Complete Student 6 details & 5 minutes & Removes a visible placeholder from the first slide. \\
-Add backup screenshots & 15 minutes & Reduces risk if Streamlit fails during the presentation. \\
+Add backup screenshots & 15 minutes & Reduces risk if Streamlit fails during the presentation. Capture the Overview tab, a single-ticket result, and batch output. \\
 Register the Jupyter kernel & 10 minutes & Improves reproducibility: \texttt{python -m ipykernel install --user --name customer-support-ai}. \\
 Add individual contributions & 20 minutes & Satisfies the individual assessment requirement. \\
 Add an ``implemented vs future work'' table & 20 minutes & Avoids overclaiming LLM/GenAI and demonstrates critical thinking. Include the optional transformer benchmark as implemented report evidence, and LLM/GenAI as future work. \\
-Mention transformer embeddings in the presentation & 10 minutes & Strengthens the SLO4 discussion. Recommended wording: ``We added an optional sampled transformer-embedding benchmark for the report, but the demo keeps Linear SVM because it is stronger and more explainable in our current results.'' \\
-Refine transformer benchmark if time allows & 2--4 hours & Optional for the final report. Try larger samples, class balancing, or Linear SVM on embeddings. Keep it out of the live app unless it clearly outperforms the current pipeline. \\
-Update README with exact demo command & 10 minutes & Helps every group member run the app reliably. \\
+Mention transformer embeddings in the presentation & 10 minutes & Strengthens the SLO4 discussion. Recommended wording: ``We added an optional sampled transformer-embedding benchmark as comparison evidence, but live predictions keep Linear SVM because it is stronger and more explainable in our current results.'' \\
+Refine transformer benchmark if time allows & 2--4 hours & Optional for the final report. Try larger samples, class balancing, or Linear SVM on embeddings. Keep it out of live ticket routing unless it clearly outperforms the current pipeline. \\
+Update README and demo checklist & \done & The documentation now covers the exact demo command, Overview evidence, batch upload, and transformer benchmark display. \\
 Document train/inference limitation & 15 minutes & Shows technical honesty and prepares the team for Q\&A. \\
 Verify business references & 30 minutes & Prevents weak or inaccurate sources in the slides/report. \\
 \bottomrule
@@ -168,7 +169,7 @@ The app masks emails and phone numbers in summaries, but it does not cover every
 \subsection{Optional transformer benchmark}
 The optional transformer benchmark now exists, but it is sampled and currently performs below the full-data TF-IDF + Linear SVM results. This is not a failure; it is useful empirical evidence that a transformer representation is not automatically better without tuning, enough training data, and careful validation.
 
-\textbf{Presentation action:} mention it briefly as report evidence or future refinement, not as the main system.
+\textbf{Presentation action:} mention it briefly as comparison evidence or future refinement, not as the live prediction system.
 
 \textbf{Report action:} use it to strengthen the comparison of AI approaches: sparse lexical TF-IDF versus dense semantic multilingual embeddings. Explain that the production/demo choice remains Linear SVM because it currently offers better measured performance, lower complexity, and clearer explanation terms.
 
