@@ -13,3 +13,4 @@ streamlit>=1.36
 google-genai>=1.0
 gensim>=4.3.0
 top2vec>=1.0.34
+pytest>=8.0

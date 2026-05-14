@@ -183,6 +183,9 @@ def analyse_batch(
             "predicted_priority": result["priority"],
             "recommended_team": result["recommended_team"],
             "escalation_required": result["escalation_required"],
+            "queue_confidence": result.get("queue_confidence"),
+            "priority_confidence": result.get("priority_confidence"),
+            "human_review_required": result.get("human_review_required"),
             "summary": result["summary"],
         })
 

@@ -89,6 +89,16 @@ results/confusion_matrix_priority.png
 
 This creates presentation/report charts in `report_assets/` and extra evaluation tables in `results/`.
 
+## 5A. Confidence-Aware Ensemble
+
+Run this optional extension to generate confidence-aware ensemble evidence:
+
+```powershell
+.\.venv\Scripts\python.exe -m customer_support_ai.ensemble
+```
+
+This saves confidence-aware ensemble models, example predictions, and `results/confidence_ensemble_results.csv`. The output supports responsible AI discussion by reporting confidence, coverage, and human-review rates.
+
 ## 6. Streamlit Demo
 
 ```powershell
@@ -99,6 +109,8 @@ The app has two main areas:
 
 - `Overview`: dataset/profile metrics, workflow, model charts, final report tables, per-language and per-class outputs, and optional transformer benchmark evidence when the benchmark files exist.
 - `Try Solution`: single-ticket analysis plus CSV/XLSX/XLS batch upload for up to 200 rows, with downloadable predictions.
+
+The prediction outputs include queue confidence, priority confidence, and a human-review recommendation when confidence estimates are available.
 
 Use `docs/presentation_demo_examples.md` for stable demo inputs and a suggested batch-upload demonstration.
 
@@ -117,3 +129,12 @@ Run the sampled benchmark:
 ```
 
 This saves `results/transformer_embedding_benchmark.csv` and `results/transformer_embedding_benchmark.json`. Use it for report discussion and the Streamlit Overview evidence panel. The live ticket predictions still use the trained TF-IDF Linear SVM models.
+
+## 8. Reproducibility and QA Checks
+
+```powershell
+.\.venv\Scripts\python.exe -m customer_support_ai.repository_health
+.\.venv\Scripts\python.exe -m pytest
+```
+
+The health check validates key result files and detects unresolved Git conflict markers in important report/app artifacts.
