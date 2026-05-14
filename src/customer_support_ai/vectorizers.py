@@ -5,8 +5,6 @@ from __future__ import annotations
 import numpy as np
 
 from sklearn.base import BaseEstimator, TransformerMixin
-from gensim.models import Word2Vec
-from top2vec import Top2Vec
 
 
 class Word2VecTransformer(BaseEstimator, TransformerMixin):
@@ -26,6 +24,8 @@ class Word2VecTransformer(BaseEstimator, TransformerMixin):
         self.model = None
 
     def fit(self, X, y=None):
+        from gensim.models import Word2Vec
+
         # Tokenize the input text
         sentences = [str(text).split() for text in X]
         self.model = Word2Vec(
@@ -64,6 +64,7 @@ class Top2VecTransformer(BaseEstimator, TransformerMixin):
         self.model = None
 
     def fit(self, X, y=None):
+        from top2vec import Top2Vec
 
         # Top2Vec needs a list of documents
         documents = [str(text) for text in X]
