@@ -157,6 +157,8 @@ models/*
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 !models/.gitkeep
+!models/category_model.pkl
+!models/priority_model.pkl
 !results/*.csv
 !results/*.json
 !results/*.png

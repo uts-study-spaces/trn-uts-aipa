@@ -1,0 +1,16 @@
+﻿method,task,split,macro_f1,role,decision
+TF-IDF + Linear SVM,category,test,0.524646,Selected live model,Best validated balance of performance speed and explainability
+TF-IDF + Linear SVM,priority,test,0.567824,Selected live model,Best validated balance of performance speed and explainability
+TF-IDF + Logistic Regression,category,validation,0.408271,Baseline,Lower validation performance than Linear SVM
+TF-IDF + Logistic Regression,priority,validation,0.527821,Baseline,Lower validation performance than Linear SVM
+TF-IDF + Naive Bayes,category,validation,0.201916,Baseline,Simple probabilistic baseline but weak category macro F1
+TF-IDF + Naive Bayes,priority,validation,0.389717,Baseline,Simple probabilistic baseline but weak priority macro F1
+Word2Vec + Linear SVM,category,validation,0.198301,Embedding experiment,Lower than TF-IDF Linear SVM in notebook comparison
+Word2Vec + Linear SVM,priority,validation,0.384361,Embedding experiment,Lower than TF-IDF Linear SVM in notebook comparison
+Top2Vec + Linear SVM,category,validation,0.214010,Topic embedding experiment,Lower than TF-IDF Linear SVM and computationally heavier
+Top2Vec + Linear SVM,priority,validation,0.407927,Topic embedding experiment,Lower than TF-IDF Linear SVM and computationally heavier
+Transformer embeddings + Logistic Regression,category,sampled_test,0.234789,Transformer benchmark,Lower than full-data TF-IDF Linear SVM in sampled benchmark
+Transformer embeddings + Logistic Regression,priority,sampled_test,0.349574,Transformer benchmark,Lower than full-data TF-IDF Linear SVM in sampled benchmark
+Confidence and human review,both,app_layer,,Responsible AI layer,Adds confidence guidance and review flags; does not replace classifier
+Gemini AI Assistant,both,app_layer,,Interaction layer,Uses Gemini to orchestrate trained ML tools; does not replace classifier
+RL routing agent,both,exploratory,,Routing extension,Explores routing decision support; does not replace queue or priority prediction

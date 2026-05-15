@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import io
+import sys
 from pathlib import Path
 
 import altair as alt
@@ -11,6 +12,11 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 import streamlit.components.v1 as components
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+SRC_DIR = PROJECT_ROOT / "src"
+if str(SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(SRC_DIR))
 
 from customer_support_ai.config import DATA_PROCESSED_DIR, MODELS_DIR, RESULTS_DIR
 from customer_support_ai.confidence import confidence_level, needs_human_review
@@ -505,6 +511,13 @@ def load_optional_csv(filename: str) -> pd.DataFrame:
 
 
 @st.cache_data(show_spinner=False)
+def load_experiment_comparison() -> pd.DataFrame:
+    """Load the curated experiment comparison used in the overview."""
+    path = RESULTS_DIR / "experiment_comparison.csv"
+    return pd.read_csv(path) if path.exists() else pd.DataFrame()
+
+
+@st.cache_data(show_spinner=False)
 def load_dashboard_reference_data() -> pd.DataFrame:
     """Load only columns needed for dashboard charts and label cards."""
     path = DATA_PROCESSED_DIR / "model_ready_tickets.csv"
@@ -512,6 +525,24 @@ def load_dashboard_reference_data() -> pd.DataFrame:
         return pd.DataFrame()
     needed_columns = {"language", "priority", "queue"}
     return pd.read_csv(path, usecols=lambda column: column in needed_columns)
+
+
+@st.cache_data(show_spinner=False)
+def load_dashboard_summary() -> dict:
+    """Load compact chart and label data for hosted demos."""
+    summary_path = RESULTS_DIR / "dashboard_summary.json"
+    if summary_path.exists():
+        return json.loads(summary_path.read_text(encoding="utf-8"))
+
+    frame = load_dashboard_reference_data()
+    if frame.empty:
+        return {}
+    return {
+        "language_counts": frame["language"].value_counts().rename_axis("language").reset_index(name="tickets").to_dict("records"),
+        "priority_counts": frame["priority"].value_counts().rename_axis("priority").reset_index(name="tickets").to_dict("records"),
+        "queues": sorted(frame["queue"].dropna().astype(str).unique()),
+        "priorities": sorted(frame["priority"].dropna().astype(str).unique()),
+    }
 
 
 @st.cache_data(show_spinner=False)
@@ -782,6 +813,48 @@ def render_workflow() -> None:
     )
 
 
+def render_experiment_evidence(experiments: pd.DataFrame) -> None:
+    """Summarise why the deployed model was selected."""
+    if experiments.empty:
+        return
+
+    selected = experiments[
+        (experiments["method"] == "TF-IDF + Linear SVM")
+        & (experiments["split"] == "test")
+    ]
+    category_f1 = selected.loc[selected["task"] == "category", "macro_f1"].max()
+    priority_f1 = selected.loc[selected["task"] == "priority", "macro_f1"].max()
+
+    st.markdown("### Why This Model")
+    st.markdown(
+        f"""
+        <div class="section-card">
+        <div class="mini-card-title">Selected deployment path: TF-IDF + Linear SVM</div>
+        <div class="muted">
+        The live app uses TF-IDF + Linear SVM because it gave the strongest validated balance of
+        predictive performance, speed, and explainability. The held-out test macro F1 is
+        <b>{category_f1:.3f}</b> for queue/category and <b>{priority_f1:.3f}</b> for priority.
+        Word2Vec, Top2Vec, Naive Bayes, Logistic Regression, MLP-style experiments, and transformer
+        embeddings were treated as comparison evidence rather than replacements.
+        </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    display_columns = ["method", "task", "split", "macro_f1", "role", "decision"]
+    labels = {
+        "method": "Method",
+        "task": "Task",
+        "split": "Split",
+        "macro_f1": "Macro F1",
+        "role": "Role",
+        "decision": "Decision",
+    }
+    with st.expander("Experiments Tested and Selection Rationale"):
+        render_dark_table(experiments[display_columns], max_rows=20, column_labels=labels)
+
+
 def overview_tab(profile: dict, metrics: pd.DataFrame) -> None:
     """Home and insights combined into one page."""
     st.markdown(
@@ -845,19 +918,22 @@ def overview_tab(profile: dict, metrics: pd.DataFrame) -> None:
         unsafe_allow_html=True,
     )
 
-    frame = load_dashboard_reference_data()
+    experiments = load_experiment_comparison()
+    render_experiment_evidence(experiments)
+
+    dashboard_summary = load_dashboard_summary()
     per_language = load_optional_csv("per_language_metrics.csv")
     per_class = load_optional_csv("per_class_f1.csv")
     transformer_benchmark = load_optional_csv("transformer_embedding_benchmark.csv")
 
     left, right = st.columns(2)
     with left:
-        if not frame.empty and "language" in frame.columns:
-            language_counts = frame["language"].value_counts().rename_axis("language").reset_index(name="tickets")
+        language_counts = pd.DataFrame(dashboard_summary.get("language_counts", []))
+        if not language_counts.empty:
             chart_card("Ticket Language Distribution", language_counts, "language", "tickets", height=280)
     with right:
-        if not frame.empty and "priority" in frame.columns:
-            priority_counts = frame["priority"].value_counts().rename_axis("priority").reset_index(name="tickets")
+        priority_counts = pd.DataFrame(dashboard_summary.get("priority_counts", []))
+        if not priority_counts.empty:
             chart_card("Priority Distribution", priority_counts, "priority", "tickets", height=280)
 
     left, right = st.columns(2)
@@ -906,12 +982,12 @@ def solution_tab() -> None:
 
 def render_label_space() -> None:
     """Show the labels and outputs users can expect from the solution."""
-    frame = load_dashboard_reference_data()
+    dashboard_summary = load_dashboard_summary()
     st.markdown("#### Output Labels")
     q1, q2, q3 = st.columns(3)
     with q1:
-        if not frame.empty and "queue" in frame.columns:
-            queues = sorted(frame["queue"].dropna().astype(str).unique())
+        queues = dashboard_summary.get("queues", [])
+        if queues:
             st.markdown(
                 "<div class='section-card'><div class='mini-card-title'>Predicted Queues / Categories</div><div class='muted'>"
                 + ", ".join(queues)
@@ -919,8 +995,8 @@ def render_label_space() -> None:
                 unsafe_allow_html=True,
             )
     with q2:
-        if not frame.empty and "priority" in frame.columns:
-            priorities = sorted(frame["priority"].dropna().astype(str).unique())
+        priorities = dashboard_summary.get("priorities", [])
+        if priorities:
             st.markdown(
                 "<div class='section-card'><div class='mini-card-title'>Predicted Priorities</div><div class='muted'>"
                 + ", ".join(priorities)
