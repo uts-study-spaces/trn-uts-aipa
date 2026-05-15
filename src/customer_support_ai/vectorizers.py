@@ -56,7 +56,10 @@ class Top2VecTransformer(BaseEstimator, TransformerMixin):
     """Represent documents using Top2Vec embeddings."""
 
     def __init__(
-        self, embedding_model: str = "doc2vec", speed: str = "learn", workers: int = 4
+        self,
+        embedding_model: str = "doc2vec",
+        speed: str = "learn",
+        workers: int = 1,
     ):
         self.embedding_model = embedding_model
         self.speed = speed
@@ -73,6 +76,7 @@ class Top2VecTransformer(BaseEstimator, TransformerMixin):
             embedding_model=self.embedding_model,
             speed=self.speed,
             workers=self.workers,
+            umap_args={"n_neighbors": 15, "n_components": 5, "metric": "cosine", "random_state": 42, "n_jobs": 1},
         )
         return self
 

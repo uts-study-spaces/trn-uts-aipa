@@ -1,0 +1,55 @@
+{
+  "language_counts": [
+    {
+      "language": "en",
+      "tickets": 25135
+    },
+    {
+      "language": "de",
+      "tickets": 17379
+    },
+    {
+      "language": "es",
+      "tickets": 812
+    },
+    {
+      "language": "fr",
+      "tickets": 476
+    },
+    {
+      "language": "pt",
+      "tickets": 473
+    }
+  ],
+  "priority_counts": [
+    {
+      "priority": "medium",
+      "tickets": 17959
+    },
+    {
+      "priority": "high",
+      "tickets": 17354
+    },
+    {
+      "priority": "low",
+      "tickets": 8962
+    }
+  ],
+  "queues": [
+    "Billing and Payments",
+    "Customer Service",
+    "General Inquiry",
+    "Human Resources",
+    "IT Support",
+    "Product Support",
+    "Returns and Exchanges",
+    "Sales and Pre-Sales",
+    "Service Outages and Maintenance",
+    "Technical Support"
+  ],
+  "priorities": [
+    "high",
+    "low",
+    "medium"
+  ]
+}

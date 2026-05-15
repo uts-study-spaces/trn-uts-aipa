@@ -3,15 +3,27 @@
 from __future__ import annotations
 
 import json
+import io
+import sys
 from pathlib import Path
 
 import altair as alt
+import numpy as np
 import pandas as pd
 import streamlit as st
 import streamlit.components.v1 as components
 
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+SRC_DIR = PROJECT_ROOT / "src"
+if str(SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(SRC_DIR))
+
 from customer_support_ai.config import DATA_PROCESSED_DIR, MODELS_DIR, RESULTS_DIR
+from customer_support_ai.confidence import confidence_level, needs_human_review
+from customer_support_ai.features import clean_text
 from customer_support_ai.predict import analyse_ticket, load_model
+from customer_support_ai.routing_rules import escalation_required, recommend_team
+from customer_support_ai.summarisation import summarise_ticket
 
 try:
     from customer_support_ai.llm_agent import analyse_batch, create_chat_session, send_message, validate_api_key
@@ -331,6 +343,7 @@ def inject_style() -> None:
             overflow: hidden;
             border-radius: 8px;
             font-size: 0.9rem;
+            table-layout: auto;
         }
         .dark-table th {
             background: rgba(94, 234, 212, 0.14);
@@ -338,12 +351,72 @@ def inject_style() -> None:
             padding: 0.7rem;
             text-align: left;
             border-bottom: 1px solid rgba(170, 211, 243, 0.18);
+            line-height: 1.2;
+            white-space: normal;
+            overflow-wrap: normal;
+            word-break: normal;
         }
         .dark-table td {
             background: rgba(255, 255, 255, 0.055);
             color: #e8f1f9;
             padding: 0.65rem 0.7rem;
             border-bottom: 1px solid rgba(170, 211, 243, 0.10);
+            line-height: 1.45;
+            vertical-align: top;
+            white-space: normal;
+            overflow-wrap: break-word;
+            word-break: normal;
+        }
+        .dark-table th:first-child,
+        .dark-table td:first-child {
+            width: 28%;
+        }
+        .dark-table th:last-child,
+        .dark-table td:last-child {
+            width: 19%;
+        }
+        .batch-table {
+            font-size: 0.82rem;
+            table-layout: fixed;
+        }
+        .batch-table th {
+            font-size: 0.72rem;
+            padding: 0.55rem 0.48rem;
+            line-height: 1.12;
+            overflow-wrap: normal;
+            word-break: normal;
+        }
+        .batch-table td {
+            padding: 0.62rem 0.5rem;
+            line-height: 1.38;
+        }
+        .batch-table th:first-child,
+        .batch-table td:first-child {
+            width: 24%;
+        }
+        .batch-table th:last-child,
+        .batch-table td:last-child {
+            width: 16%;
+        }
+        .batch-table th:nth-child(4),
+        .batch-table td:nth-child(4),
+        .batch-table th:nth-child(9),
+        .batch-table td:nth-child(9) {
+            width: 10%;
+        }
+        .batch-table th:nth-child(2),
+        .batch-table td:nth-child(2),
+        .batch-table th:nth-child(3),
+        .batch-table td:nth-child(3),
+        .batch-table th:nth-child(5),
+        .batch-table td:nth-child(5),
+        .batch-table th:nth-child(6),
+        .batch-table td:nth-child(6),
+        .batch-table th:nth-child(7),
+        .batch-table td:nth-child(7),
+        .batch-table th:nth-child(8),
+        .batch-table td:nth-child(8) {
+            width: 7%;
         }
         div[data-testid="stVerticalBlockBorderWrapper"] ::-webkit-scrollbar {
             width: 7px;
@@ -409,20 +482,21 @@ def chart_theme(chart: alt.Chart) -> alt.Chart:
     )
 
 
+@st.cache_resource(show_spinner=False)
 def load_models():
-    """Load models once per browser session without Streamlit cache shortcuts."""
-    if "category_model" not in st.session_state:
-        st.session_state["category_model"] = load_model(MODELS_DIR / "category_model.pkl")
-    if "priority_model" not in st.session_state:
-        st.session_state["priority_model"] = load_model(MODELS_DIR / "priority_model.pkl")
-    return st.session_state["category_model"], st.session_state["priority_model"]
+    """Load models once and reuse them across Streamlit reruns."""
+    category_model = load_model(MODELS_DIR / "category_model.pkl")
+    priority_model = load_model(MODELS_DIR / "priority_model.pkl")
+    return category_model, priority_model
 
 
+@st.cache_data(show_spinner=False)
 def load_metrics() -> pd.DataFrame:
     metrics_path = RESULTS_DIR / "metrics_summary.csv"
     return pd.read_csv(metrics_path) if metrics_path.exists() else pd.DataFrame()
 
 
+@st.cache_data(show_spinner=False)
 def load_dataset_profile() -> dict:
     profile_path = RESULTS_DIR / "dataset_profile.json"
     if not profile_path.exists():
@@ -430,24 +504,62 @@ def load_dataset_profile() -> dict:
     return json.loads(profile_path.read_text(encoding="utf-8"))
 
 
+@st.cache_data(show_spinner=False)
 def load_optional_csv(filename: str) -> pd.DataFrame:
     path = RESULTS_DIR / filename
     return pd.read_csv(path) if path.exists() else pd.DataFrame()
 
 
-def load_model_ready_data() -> pd.DataFrame:
-    path = DATA_PROCESSED_DIR / "model_ready_tickets.csv"
+@st.cache_data(show_spinner=False)
+def load_experiment_comparison() -> pd.DataFrame:
+    """Load the curated experiment comparison used in the overview."""
+    path = RESULTS_DIR / "experiment_comparison.csv"
     return pd.read_csv(path) if path.exists() else pd.DataFrame()
+
+
+@st.cache_data(show_spinner=False)
+def load_dashboard_reference_data() -> pd.DataFrame:
+    """Load only columns needed for dashboard charts and label cards."""
+    path = DATA_PROCESSED_DIR / "model_ready_tickets.csv"
+    if not path.exists():
+        return pd.DataFrame()
+    needed_columns = {"language", "priority", "queue"}
+    return pd.read_csv(path, usecols=lambda column: column in needed_columns)
+
+
+@st.cache_data(show_spinner=False)
+def load_dashboard_summary() -> dict:
+    """Load compact chart and label data for hosted demos."""
+    summary_path = RESULTS_DIR / "dashboard_summary.json"
+    if summary_path.exists():
+        return json.loads(summary_path.read_text(encoding="utf-8"))
+
+    frame = load_dashboard_reference_data()
+    if frame.empty:
+        return {}
+    return {
+        "language_counts": frame["language"].value_counts().rename_axis("language").reset_index(name="tickets").to_dict("records"),
+        "priority_counts": frame["priority"].value_counts().rename_axis("priority").reset_index(name="tickets").to_dict("records"),
+        "queues": sorted(frame["queue"].dropna().astype(str).unique()),
+        "priorities": sorted(frame["priority"].dropna().astype(str).unique()),
+    }
+
+
+@st.cache_data(show_spinner=False)
+def read_uploaded_table_cached(filename: str, file_bytes: bytes) -> pd.DataFrame:
+    """Read a CSV or Excel upload once per selected file."""
+    suffix = Path(filename).suffix.lower()
+    buffer = io.BytesIO(file_bytes)
+    if suffix == ".csv":
+        return pd.read_csv(buffer)
+    if suffix in {".xlsx", ".xls"}:
+        return pd.read_excel(buffer)
+    raise ValueError("Upload a CSV or Excel file.")
 
 
 def read_uploaded_table(uploaded_file) -> pd.DataFrame:
     """Read a CSV or Excel upload for batch ticket analysis."""
-    suffix = Path(uploaded_file.name).suffix.lower()
-    if suffix == ".csv":
-        return pd.read_csv(uploaded_file)
-    if suffix in {".xlsx", ".xls"}:
-        return pd.read_excel(uploaded_file)
-    raise ValueError("Upload a CSV or Excel file.")
+    return read_uploaded_table_cached(uploaded_file.name, uploaded_file.getvalue())
 
 
 def find_text_columns(frame: pd.DataFrame) -> list[str]:
@@ -471,16 +583,119 @@ def find_text_columns(frame: pd.DataFrame) -> list[str]:
     return candidates
 
 
-def render_dark_table(data: pd.DataFrame, max_rows: int | None = None) -> None:
+def estimate_batch_confidence(model, texts: list[str]) -> list[float]:
+    """Estimate confidence for many rows with one model call."""
+    if not texts:
+        return []
+    if hasattr(model, "predict_proba"):
+        probabilities = np.asarray(model.predict_proba(texts), dtype=float)
+        return probabilities.max(axis=1).astype(float).tolist()
+
+    if hasattr(model, "decision_function"):
+        scores = np.asarray(model.decision_function(texts), dtype=float)
+        if scores.ndim == 1:
+            confidences = 1.0 / (1.0 + np.exp(-np.abs(scores)))
+            return confidences.astype(float).tolist()
+        shifted = scores - scores.max(axis=1, keepdims=True)
+        exps = np.exp(shifted)
+        totals = exps.sum(axis=1, keepdims=True)
+        probabilities = np.divide(exps, totals, out=np.zeros_like(exps), where=totals != 0)
+        return probabilities.max(axis=1).astype(float).tolist()
+
+    return [0.0 for _ in texts]
+
+
+def analyse_tickets_batch(texts: list[str], category_model, priority_model) -> pd.DataFrame:
+    """Analyse a batch with vectorised prediction for faster dashboard uploads."""
+    model_texts = [clean_text(text) for text in texts]
+    categories = [str(label) for label in category_model.predict(model_texts)]
+    priorities = [str(label) for label in priority_model.predict(model_texts)]
+    queue_confidences = estimate_batch_confidence(category_model, model_texts)
+    priority_confidences = estimate_batch_confidence(priority_model, model_texts)
+
+    rows = []
+    for text, category, priority, queue_confidence, priority_confidence in zip(
+        texts,
+        categories,
+        priorities,
+        queue_confidences,
+        priority_confidences,
+    ):
+        escalation = escalation_required(priority, text)
+        review_required, review_reason = needs_human_review(
+            queue_confidence,
+            priority_confidence,
+            escalation,
+        )
+        rows.append(
+            {
+                "ticket_text": text,
+                "predicted_queue": category,
+                "predicted_priority": priority,
+                "recommended_team": recommend_team(category, text),
+                "escalation_required": escalation,
+                "queue_confidence": queue_confidence,
+                "priority_confidence": priority_confidence,
+                "human_review_required": review_required,
+                "human_review_reason": review_reason,
+                "summary": summarise_ticket(text, category, priority),
+            }
+        )
+    return pd.DataFrame(rows)
+
+
+def pretty_column_name(column: object) -> str:
+    """Convert technical column names into presentation-friendly labels."""
+    return str(column).replace("_", " ").strip().title()
+
+
+def format_table_value(value) -> str:
+    """Format table values for dashboard display."""
+    if pd.isna(value):
+        return "Not available"
+    if isinstance(value, bool):
+        return "Yes" if value else "No"
+    if isinstance(value, float):
+        if 0 <= value <= 1:
+            return f"{value:.0%}"
+        return f"{value:.3g}"
+    return str(value)
+
+
+def render_dark_table(
+    data: pd.DataFrame,
+    max_rows: int | None = None,
+    column_labels: dict[str, str] | None = None,
+    table_class: str = "dark-table",
+) -> None:
     """Render a compact dark HTML table instead of the default white grid."""
     if data.empty:
         st.info("No table data is available.")
         return
     display_data = data.head(max_rows).copy() if max_rows else data.copy()
-    for column in display_data.select_dtypes(include="number").columns:
-        display_data[column] = display_data[column].map(lambda value: f"{value:.4g}")
-    html = display_data.to_html(index=False, escape=False, classes="dark-table")
+    display_data = display_data.map(format_table_value)
+    display_data = display_data.rename(
+        columns={
+            column: (column_labels or {}).get(str(column), pretty_column_name(column))
+            for column in display_data.columns
+        }
+    )
+    html = display_data.to_html(index=False, escape=False, classes=table_class)
     st.markdown(html, unsafe_allow_html=True)
+
+
+BATCH_RESULT_LABELS = {
+    "ticket_text": "Ticket",
+    "predicted_queue": "Queue",
+    "predicted_priority": "Priority",
+    "recommended_team": "Team",
+    "escalation_required": "Escalation",
+    "queue_confidence": "Queue Conf.",
+    "priority_confidence": "Priority Conf.",
+    "human_review_required": "Review",
+    "human_review_reason": "Reason",
+    "summary": "Summary",
+}
 
 
 def bar_chart(
@@ -524,13 +739,15 @@ def chart_card(title: str, data: pd.DataFrame, x: str, y: str, color: str | None
 
 
 def render_result(result: dict) -> None:
+    review_value = "Required" if result.get("human_review_required") else "Standard review"
     result_items = [
         ("Predicted queue", result["category"]),
         ("Predicted priority", result["priority"]),
         ("Recommended team", result["recommended_team"]),
         ("Escalation", "Required" if result["escalation_required"] else "Not required"),
+        ("Human review", review_value),
     ]
-    columns = st.columns(4)
+    columns = st.columns(5)
     for column, (label, value) in zip(columns, result_items):
         with column:
             st.markdown(
@@ -564,14 +781,13 @@ def render_result(result: dict) -> None:
     queue_confidence = result.get("queue_confidence")
     priority_confidence = result.get("priority_confidence")
     if queue_confidence is not None and priority_confidence is not None:
-        review_label = "Required" if result.get("human_review_required") else "Standard review"
         st.markdown("#### Confidence and Human Review")
         st.markdown(
             f"""
             <div class="section-card">
             <b>Queue confidence:</b> {queue_confidence:.2f} ({result.get('queue_confidence_level', 'N/A')})<br>
             <b>Priority confidence:</b> {priority_confidence:.2f} ({result.get('priority_confidence_level', 'N/A')})<br>
-            <b>Human review:</b> {review_label}<br>
+            <b>Human review:</b> {review_value}<br>
             <b>Reason:</b> {result.get('human_review_reason', 'Confidence guidance unavailable.')}
             </div>
             """,
@@ -597,6 +813,48 @@ def render_workflow() -> None:
     )
 
 
+def render_experiment_evidence(experiments: pd.DataFrame) -> None:
+    """Summarise why the deployed model was selected."""
+    if experiments.empty:
+        return
+
+    selected = experiments[
+        (experiments["method"] == "TF-IDF + Linear SVM")
+        & (experiments["split"] == "test")
+    ]
+    category_f1 = selected.loc[selected["task"] == "category", "macro_f1"].max()
+    priority_f1 = selected.loc[selected["task"] == "priority", "macro_f1"].max()
+
+    st.markdown("### Why This Model")
+    st.markdown(
+        f"""
+        <div class="section-card">
+        <div class="mini-card-title">Selected deployment path: TF-IDF + Linear SVM</div>
+        <div class="muted">
+        The live app uses TF-IDF + Linear SVM because it gave the strongest validated balance of
+        predictive performance, speed, and explainability. The held-out test macro F1 is
+        <b>{category_f1:.3f}</b> for queue/category and <b>{priority_f1:.3f}</b> for priority.
+        Word2Vec, Top2Vec, Naive Bayes, Logistic Regression, MLP-style experiments, and transformer
+        embeddings were treated as comparison evidence rather than replacements.
+        </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    display_columns = ["method", "task", "split", "macro_f1", "role", "decision"]
+    labels = {
+        "method": "Method",
+        "task": "Task",
+        "split": "Split",
+        "macro_f1": "Macro F1",
+        "role": "Role",
+        "decision": "Decision",
+    }
+    with st.expander("Experiments Tested and Selection Rationale"):
+        render_dark_table(experiments[display_columns], max_rows=20, column_labels=labels)
+
+
 def overview_tab(profile: dict, metrics: pd.DataFrame) -> None:
     """Home and insights combined into one page."""
     st.markdown(
@@ -609,11 +867,15 @@ def overview_tab(profile: dict, metrics: pd.DataFrame) -> None:
             <span class="pill">Priority prediction</span>
             <span class="pill">Routing rules</span>
             <span class="pill">Escalation support</span>
+            <span class="pill">Confidence guidance</span>
             <span class="pill">Explainable AI</span>
+            <span class="pill">Transformer benchmark</span>
+            <span class="pill">AI assistant</span>
             <br><br>
             <p>
                 A decision-support system for first-pass customer support triage: predict the queue,
-                estimate urgency, recommend a team, summarise the issue, and explain the decision.
+                estimate urgency, recommend a team, summarise the issue, explain the decision,
+                and flag outputs that need human review.
             </p>
         </div>
         """,
@@ -646,26 +908,32 @@ def overview_tab(profile: dict, metrics: pd.DataFrame) -> None:
         We audited five Kaggle CSV files, merged the three compatible multilingual files,
         and excluded the two German-normalized files because their queue/category labels use
         a different taxonomy. The model uses subject + body text, safe metadata, and excludes
-        the post-response answer field to avoid leakage.
+        the post-response answer field to avoid leakage. The current app also reflects later
+        project extensions: transformer benchmarking, confidence-aware review guidance,
+        reinforcement-learning routing exploration, and a Gemini-powered AI Assistant that
+        orchestrates the trained ML models as tools.
         </div>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-    frame = load_model_ready_data()
+    experiments = load_experiment_comparison()
+    render_experiment_evidence(experiments)
+
+    dashboard_summary = load_dashboard_summary()
     per_language = load_optional_csv("per_language_metrics.csv")
     per_class = load_optional_csv("per_class_f1.csv")
     transformer_benchmark = load_optional_csv("transformer_embedding_benchmark.csv")
 
     left, right = st.columns(2)
     with left:
-        if not frame.empty and "language" in frame.columns:
-            language_counts = frame["language"].value_counts().rename_axis("language").reset_index(name="tickets")
+        language_counts = pd.DataFrame(dashboard_summary.get("language_counts", []))
+        if not language_counts.empty:
             chart_card("Ticket Language Distribution", language_counts, "language", "tickets", height=280)
     with right:
-        if not frame.empty and "priority" in frame.columns:
-            priority_counts = frame["priority"].value_counts().rename_axis("priority").reset_index(name="tickets")
+        priority_counts = pd.DataFrame(dashboard_summary.get("priority_counts", []))
+        if not priority_counts.empty:
             chart_card("Priority Distribution", priority_counts, "priority", "tickets", height=280)
 
     left, right = st.columns(2)
@@ -714,12 +982,12 @@ def solution_tab() -> None:
 
 def render_label_space() -> None:
     """Show the labels and outputs users can expect from the solution."""
-    frame = load_model_ready_data()
+    dashboard_summary = load_dashboard_summary()
     st.markdown("#### Output Labels")
     q1, q2, q3 = st.columns(3)
     with q1:
-        if not frame.empty and "queue" in frame.columns:
-            queues = sorted(frame["queue"].dropna().astype(str).unique())
+        queues = dashboard_summary.get("queues", [])
+        if queues:
             st.markdown(
                 "<div class='section-card'><div class='mini-card-title'>Predicted Queues / Categories</div><div class='muted'>"
                 + ", ".join(queues)
@@ -727,8 +995,8 @@ def render_label_space() -> None:
                 unsafe_allow_html=True,
             )
     with q2:
-        if not frame.empty and "priority" in frame.columns:
-            priorities = sorted(frame["priority"].dropna().astype(str).unique())
+        priorities = dashboard_summary.get("priorities", [])
+        if priorities:
             st.markdown(
                 "<div class='section-card'><div class='mini-card-title'>Predicted Priorities</div><div class='muted'>"
                 + ", ".join(priorities)
@@ -858,33 +1126,21 @@ def render_batch_upload_form() -> None:
             st.error("Model files are missing. Train the models first with: python -m customer_support_ai.train")
             return
 
-        rows = []
         subset = uploaded_df.head(max_rows).copy()
-        for text in subset[text_column].fillna("").astype(str):
-            if text.strip():
-                result = analyse_ticket(text, category_model, priority_model)
-                rows.append(
-                    {
-                        "ticket_text": text,
-                        "predicted_queue": result["category"],
-                        "predicted_priority": result["priority"],
-                        "recommended_team": result["recommended_team"],
-                        "escalation_required": result["escalation_required"],
-                        "queue_confidence": result.get("queue_confidence"),
-                        "priority_confidence": result.get("priority_confidence"),
-                        "human_review_required": result.get("human_review_required"),
-                        "summary": result["summary"],
-                    }
-                )
-
-        result_df = pd.DataFrame(rows)
+        texts = [text for text in subset[text_column].fillna("").astype(str) if text.strip()]
+        result_df = analyse_tickets_batch(texts, category_model, priority_model)
         st.session_state["batch_result_df"] = result_df
 
     if "batch_result_df" in st.session_state:
         result_df = st.session_state["batch_result_df"]
         if not result_df.empty:
             st.success(f"Analysed {len(result_df)} tickets.")
-            render_dark_table(result_df, max_rows=12)
+            render_dark_table(
+                result_df,
+                max_rows=12,
+                column_labels=BATCH_RESULT_LABELS,
+                table_class="dark-table batch-table",
+            )
             st.download_button(
                 "Download predictions CSV",
                 result_df.to_csv(index=False).encode("utf-8"),
@@ -999,7 +1255,12 @@ def ai_assistant_tab() -> None:
                 if message.get("batch") and "agent_batch_df" in st.session_state:
                     batch_df = st.session_state["agent_batch_df"]
                     if not batch_df.empty:
-                        render_dark_table(batch_df, max_rows=10)
+                        render_dark_table(
+                            batch_df,
+                            max_rows=10,
+                            column_labels=BATCH_RESULT_LABELS,
+                            table_class="dark-table batch-table",
+                        )
                         st.download_button(
                             "Download predictions CSV",
                             batch_df.to_csv(index=False).encode("utf-8"),
