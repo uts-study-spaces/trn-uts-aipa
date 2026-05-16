@@ -1,4 +1,4 @@
-# Customer Support AI Implementation
+# Ticket Routing Intelligence
 
 This repository contains the actual AI implementation for the Assessment 3 group project in Artificial Intelligence Principles and Applications at UTS. The system supports customer service teams by classifying support tickets, predicting priority, recommending a support team, summarising the issue, explaining key prediction terms, flagging escalation risk, and analysing small batches of tickets through the demo app.
 
@@ -18,6 +18,7 @@ Customer support teams receive high volumes of tickets across account access, bi
   - TF-IDF + Logistic Regression
   - TF-IDF + Linear SVM
   - TF-IDF + Naive Bayes
+- MLP priority experiment using TF-IDF, dimensionality reduction, and a neural-network classifier.
 - Optional multilingual transformer-embedding benchmark for final report discussion.
 - Separate supervised models for category prediction and priority prediction.
 - Rule-based reasoning for routing and escalation.
@@ -32,11 +33,11 @@ Customer support teams receive high volumes of tickets across account access, bi
 ## Repository Structure
 
 ```text
-app/                         Streamlit interface for overview, single-ticket demo, and batch demo
+app/                         Streamlit interface for overview, single-ticket demo, batch demo, and AI Assistant
 data/raw/                    Full Kaggle dataset location, not committed
 data/processed/              Generated model-ready dataset, not committed
 docs/                        Project plan, run checklist, demo examples, and assignment notes
-models/                      Trained model files, not committed
+models/                      Trained model files used by the public Streamlit app
 notebooks/                   Clean staged notebooks for final workflow
 reports/                     Status report and executed notebook copies
 report_assets/               Generated charts for report and presentation
@@ -90,9 +91,11 @@ Optional transformer benchmark dependencies:
 
 ## Dataset
 
-Download the Kaggle Multilingual Customer Support Tickets dataset:
+Download the Kaggle **Multilingual Customer Support Tickets** dataset by Tobias Bueck:
 
 https://www.kaggle.com/datasets/tobiasbueck/multilingual-customer-support-tickets
+
+The dataset contains multilingual support requests with fields such as ticket subject, message body, language, ticket type, queue/category, priority, tags, and an agent answer. The project uses the customer-facing ticket text and safe pre-resolution metadata to predict the support queue and priority. The `answer` field is excluded because it is only available after an agent responds.
 
 Recommended method:
 
@@ -164,6 +167,13 @@ Training saves:
 - `results/confusion_matrix_category.png`
 - `results/confusion_matrix_priority.png`
 
+The selected live models are TF-IDF + Linear SVM for both queue/category and priority. The saved Streamlit deployment models are:
+
+```text
+models/category_model.pkl
+models/priority_model.pkl
+```
+
 ## Generate Report and Presentation Assets
 
 After training the models:
@@ -191,6 +201,10 @@ This saves:
 - `results/transformer_embedding_benchmark.json`
 
 The benchmark is not used for live ticket prediction. If the benchmark output files exist, Streamlit displays them in the Overview tab alongside the main TF-IDF model results so they can support report and presentation discussion.
+
+## MLP Priority Experiment
+
+The project also includes an MLP priority experiment to test whether a multi-layer neural network improves the urgency classifier. In the verified local check, the MLP reached priority test macro F1 of `0.561`, slightly below the TF-IDF + Linear SVM priority macro F1 of `0.568`. For this reason, MLP is shown as comparison evidence but is not used by the deployed app.
 
 ## Optional Confidence-Aware Ensemble
 
@@ -240,7 +254,9 @@ Stable presentation examples are available in `docs/presentation_demo_examples.m
 
 ## Using the AI Assistant
 
-Navigate to **Try Solution → AI Assistant**. Enter a Gemini API key when prompted - a working key is provided in the Canvas report submission under Section 7 - GitHub Repository to avoid key misuse.
+Navigate to **Try Solution -> AI Assistant**. Enter a Gemini API key when prompted. For security, API keys are not stored in the repository or written into the report. A free-tier Gemini API key can be created through Google AI Studio:
+
+https://aistudio.google.com/api-keys
 
 Type or paste a support ticket into the chat input and press Enter to triage it. To process a batch, click the **+** button in the chat input to attach a CSV or Excel file.
 
@@ -254,7 +270,7 @@ This system is decision support, not full automation. It avoids using resolution
 - Staged notebooks 01 to 05 run successfully with the merged local dataset.
 - Optional notebook 06 runs a sampled multilingual transformer-embedding benchmark for comparison and future-work discussion.
 - Current strongest model is Linear SVM for both queue and priority prediction.
+- MLP, Word2Vec, Top2Vec, transformer embeddings, Gemini assistance, and RL routing exploration are included as comparison or extension evidence; they do not replace the deployed TF-IDF Linear SVM prediction path.
 - Current modelling dataset has 44,275 usable rows after auditing five CSV files and deduplicating the three compatible files.
 - Report-ready metrics, classification reports, confusion matrices, extra evaluation tables, slide charts, and example success/failure cases have been regenerated.
-- Streamlit now includes an Overview evidence dashboard, a single-ticket demo, a batch upload workflow, dark report tables, Altair charts, and optional transformer benchmark display.
-- Group member names, student IDs, screenshots, and final contribution statements still need to be added before submission.
+- Streamlit includes an Overview evidence dashboard, a single-ticket demo, a batch upload workflow, dark report tables, Altair charts, optional transformer benchmark display, and the Gemini-backed AI Assistant.

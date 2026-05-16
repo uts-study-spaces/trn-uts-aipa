@@ -27,8 +27,6 @@
 \newcolumntype{Y}{>{\raggedright\arraybackslash}X}
 \sloppy
 
-\newcommand{\pending}[1]{\begingroup\setlength{\fboxsep}{2pt}\colorbox{yellow!55}{\parbox{\dimexpr\linewidth-2\fboxsep\relax}{\textbf{PENDING:} #1}}\endgroup}
-
 \begin{document}
 \begin{titlepage}
 \centering
@@ -78,6 +76,7 @@ The project objectives are:
   \item predict support queue/category from ticket text and safe pre-resolution metadata;
   \item predict priority as high, medium, or low;
   \item compare explainable NLP classifiers using validation and test metrics;
+  \item test whether a multi-layer neural network improves priority prediction;
   \item benchmark multilingual transformer embeddings as an alternative representation;
   \item add rule-based routing and escalation logic;
   \item provide human-readable summaries and explanation terms;
@@ -100,7 +99,7 @@ The problem is slow and inconsistent ticket triage. A ticket must be mapped to a
 The system can reduce manual work by giving agents an initial recommendation. It also improves transparency by showing explanation terms and escalation reasons. The prototype supports single-ticket analysis and batch upload from CSV or Excel files.
 
 \subsection{Challenges and Constraints}
-The main constraints are dataset imbalance, multilingual text, overlapping categories, and privacy. Some languages have fewer examples, and ticket text may include personal information. The summary function masks obvious emails and phone numbers. For reproducibility and privacy, the deployed demo uses simple explainable methods instead of external LLM services.
+The main constraints are dataset imbalance, multilingual text, overlapping categories, and privacy. Some languages have fewer examples, and ticket text may include personal information. The summary function masks obvious emails and phone numbers. For reproducibility and privacy, the core prediction path uses simple explainable methods; the Gemini assistant is optional and separate from the classifier.
 
 \subsection{Project Objectives and Scope}
 The scope is a working prototype and reproducible pipeline with notebooks, Python modules, metrics, charts, and a Streamlit app. It is not production-ready. Production use would require ticketing-system integration, access control, monitoring, retraining, stronger privacy redaction, and testing on company data.
@@ -112,7 +111,10 @@ The solution combines several AI methods:
   \item supervised NLP classification for queue and priority prediction;
   \item TF-IDF vectorisation to convert text into sparse numerical features;
   \item Logistic Regression, Naive Bayes, and Linear SVM as comparison models;
+  \item an MLP neural-network candidate for checking non-linear priority classification;
   \item rule-based reasoning for routing and escalation;
+  \item reinforcement-learning routing exploration as a future extension;
+  \item optional Gemini-based LLM assistance for conversational triage support;
   \item template-based summarisation with privacy masking;
   \item explanation terms from influential TF-IDF features;
   \item optional multilingual transformer embeddings for comparison evidence.
@@ -126,10 +128,10 @@ The rule-based layer represents operational knowledge. For example, words such a
 \subsection{Justification of Selected Methods}
 Linear SVM was selected because it had the best validation macro F1 for both queue and priority. It is lightweight, fast, and explainable because the app can show influential TF-IDF terms. This is more suitable for the current prototype than a heavier model that is harder to run and explain.
 
-The transformer benchmark was kept separate from live prediction. It provides a semantic multilingual comparison using sentence embeddings (Reimers and Gurevych, 2019), but it used a sample of 2,500 tickets and performed below the current model. Therefore, it is report and future-work evidence, not the deployed prediction path.
+The MLP candidate was tested to check whether a multi-layer model could improve priority prediction. It reached priority test macro F1 of 0.561, slightly below the Linear SVM result of 0.568, so it was not selected for the live app. The transformer benchmark was also kept separate from live prediction. It provides a semantic multilingual comparison using sentence embeddings (Reimers and Gurevych, 2019), but it used a sample of 2,500 tickets and performed below the current model. Therefore, MLP and transformer results are comparison evidence, not the deployed prediction path.
 
-\subsection{Transformer Benchmark Rationale}
-The transformer benchmark used multilingual MiniLM sentence embeddings and Logistic Regression for category and priority prediction. This experiment addresses SLO4 by testing a modern deep-learning representation related to transformer, Generative AI, and LLM methods. MLP, reinforcement learning, and LLM assistant ideas were discussed by the group, but only the transformer benchmark is present in the current main repository. The live demo keeps TF-IDF because it is faster and stronger in the measured results.
+\subsection{Additional Paradigms and Experiment Rationale}
+The transformer benchmark used multilingual MiniLM sentence embeddings and Logistic Regression for category and priority prediction. This experiment addresses SLO4 by testing a modern deep-learning representation related to transformer, Generative AI, and LLM methods. The codebase also includes MLP priority experimentation, reinforcement-learning routing exploration, and a Gemini AI Assistant. These components demonstrate broader AI paradigms, but the live prediction path keeps TF-IDF with Linear SVM because it is faster, reproducible, explainable, and stronger in the measured results.
 
 \subsection{Related Work / Literature Support}
 The project follows standard NLP classification practice: text normalisation, TF-IDF feature extraction, train/validation/test splitting, model comparison, and held-out evaluation. The responsible AI design follows human oversight, leakage control, transparency, and privacy minimisation (Ribeiro, Singh and Guestrin, 2016; Jobin, Ienca and Vayena, 2019).
@@ -167,10 +169,10 @@ The project trains two separate supervised tasks:
 For each task, Logistic Regression, Multinomial Naive Bayes, and Linear SVM were compared. The data was split into training, validation, and test sets. Models were selected using validation macro F1, retrained on training plus validation data, and evaluated on the held-out test set.
 
 \subsection{Integration of AI Paradigms}
-The final prototype integrates supervised learning, a probabilistic baseline, symbolic rules, explainability, template summarisation, and transformer comparison. This shows multiple AI paradigms. Only the stable TF-IDF Linear SVM pipeline is used for live predictions.
+The final prototype integrates supervised learning, a probabilistic baseline, symbolic rules, explainability, template summarisation, MLP experimentation, reinforcement-learning routing exploration, transformer comparison, and optional LLM assistance. This shows multiple AI paradigms. Only the stable TF-IDF Linear SVM pipeline is used for live predictions.
 
 \subsection{Design Decisions vs Implementation Details}
-A key design decision was to prioritise reproducibility and explainability. The app does not call an external LLM; summaries are template-based and explanations use TF-IDF terms. This reduces cost, privacy risk, and dependency risk. Transformer results are shown in the Overview tab but are not used for routing.
+A key design decision was to prioritise reproducibility and explainability. The core prediction path does not call an external LLM; summaries are template-based and explanations use TF-IDF terms. This reduces cost, privacy risk, and dependency risk. The optional Gemini assistant is kept separate from the trained classifier, while transformer and MLP results are shown as comparison evidence rather than used for routing.
 
 \section{Empirical Analysis and Results}
 \subsection{Experimental Setup}
@@ -224,12 +226,13 @@ The project reports accuracy, macro precision, macro recall, macro F1, and weigh
 \midrule
 Category & Linear SVM & Test & 0.531 & 0.507 & 0.547 & 0.525\\
 Priority & Linear SVM & Test & 0.581 & 0.567 & 0.569 & 0.568\\
+Priority & MLP candidate & Test & 0.581 & 0.567 & 0.559 & 0.561\\
 Category & Transformer + LR & Sampled & 0.272 & 0.249 & 0.293 & 0.235\\
 Priority & Transformer + LR & Sampled & 0.357 & 0.359 & 0.359 & 0.350\\
 \bottomrule
 \end{tabularx}
 \normalsize
-\caption{Main test results and optional transformer benchmark results.}
+\caption{Main test results and additional comparison evidence. The live app uses TF-IDF Linear SVM for both queue/category and priority.}
 \end{table}
 
 \begin{figure}[H]
@@ -251,14 +254,15 @@ The optional transformer benchmark used a reproducible sample of 2,500 tickets. 
 Category & TF-IDF + Linear SVM, full test set & 0.525 & 0.531\\
 Category & Multilingual MiniLM embeddings + Logistic Regression, sampled test & 0.235 & 0.272\\
 Priority & TF-IDF + Linear SVM, full test set & 0.568 & 0.581\\
+Priority & TF-IDF + SVD + MLP candidate, full test set & 0.561 & 0.581\\
 Priority & Multilingual MiniLM embeddings + Logistic Regression, sampled test & 0.350 & 0.357\\
 \bottomrule
 \end{tabularx}
 \normalsize
-\caption{Direct report comparison between the deployed TF-IDF model and the optional transformer benchmark.}
+\caption{Direct report comparison between the deployed TF-IDF model and alternative priority/embedding experiments.}
 \end{table}
 
-This does not mean transformers are unsuitable. It means this sampled and lightly tuned experiment did not outperform the simpler pipeline. A stronger setup would need more data, class balancing, hyperparameter tuning, and possibly a better classifier. For this assignment, the result supports keeping Linear SVM for live prediction and discussing transformers as validated future work.
+This does not mean MLPs or transformers are unsuitable. It means the tested MLP and sampled transformer setup did not outperform the simpler pipeline. A stronger setup would need more data, class balancing, hyperparameter tuning, and possibly a better classifier. For this assignment, the result supports keeping Linear SVM for live prediction and discussing neural networks and transformers as validated future work.
 
 \subsection{Result Interpretation and Discussion}
 The results show useful predictive signal but also limitations. Billing and Payments is strongest because billing tickets have distinctive vocabulary. Service Outages and Maintenance also performs well. Product Support, IT Support, and Customer Service are harder because wording overlaps. Priority prediction is slightly stronger than category prediction, but low priority remains weaker than high and medium.
@@ -339,35 +343,35 @@ Optional transformer benchmark:
 This project built an AI decision-support prototype for customer support triage. It uses a real multilingual dataset, reproducible preprocessing, supervised model comparison, held-out evaluation, routing rules, escalation logic, explanation terms, and a Streamlit dashboard.
 
 \subsection{Key Insights}
-The strongest current approach is TF-IDF with Linear SVM. It gives moderate but useful performance and supports explainability. Results are strongest where categories have clear vocabulary and weaker where categories overlap or language representation is limited. The transformer benchmark did not improve performance, so the final design keeps the simpler model for live predictions.
+The strongest current approach is TF-IDF with Linear SVM. It gives moderate but useful performance and supports explainability. Results are strongest where categories have clear vocabulary and weaker where categories overlap or language representation is limited. The MLP candidate and transformer benchmark did not improve macro F1, so the final design keeps the simpler model for live predictions.
 
 \subsection{Future Work}
 Future work should improve multilingual handling, add confidence scores, learn from human corrections, strengthen privacy redaction, and test transformer, multi-layer network, reinforcement learning, or LLM-based methods under fairer conditions. Production deployment would also need monitoring, data governance, and support-system integration.
 
 \section{Individual Contributions}
-The table below summarises individual contributions using repository history, presentation artefacts, and WhatsApp evidence. Discussed work not present in the current main repository is marked as pending evidence.
+The table below summarises individual contributions using repository history, presentation artefacts, and supporting project documents.
 
 \small
-\begin{longtable}{>{\raggedright\arraybackslash}p{0.18\linewidth} >{\raggedright\arraybackslash}p{0.39\linewidth} >{\raggedright\arraybackslash}p{0.33\linewidth}}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.18\linewidth} >{\raggedright\arraybackslash}p{0.47\linewidth} >{\raggedright\arraybackslash}p{0.25\linewidth}}
 \toprule
-\textbf{Member} & \textbf{Confirmed contribution in repository or local artefacts} & \textbf{Pending contribution evidence}\\
+\textbf{Member} & \textbf{Specific contribution} & \textbf{Evidence}\\
 \midrule
 \endfirsthead
 \toprule
-\textbf{Member} & \textbf{Confirmed contribution in repository or local artefacts} & \textbf{Pending contribution evidence}\\
+\textbf{Member} & \textbf{Specific contribution} & \textbf{Evidence}\\
 \midrule
 \endhead
-Tumadhir Alsharhan \newline ID: 25605852 & Led the main AI pipeline: notebooks 01--05, reusable modules, Streamlit app, README, checklist, result files, charts, and demo examples. Amal supported planning and report/presentation framing. Tumadhir also prepared presentation and Q\&A material. & Confirmed in repository history, WhatsApp evidence, and presentation artefacts.\\
+Tumadhir Alsharhan \newline ID: 25605852 & Led the main implementation direction and integration of the project. Built and refined notebooks 01--05, reusable Python modules, the Streamlit dashboard, README/run checklist, result files, charts, and demo examples. Coordinated dataset replacement, data-loading decisions, dashboard review, presentation material, and Q\&A preparation. & Notebooks 01--05; \texttt{src/customer\_support\_ai/}; Streamlit app; README; docs; results; report assets.\\
 \addlinespace
-Mario Rubiano \newline ID: 24900627 & Reviewed code, notebooks, app, outputs, and requirements. Added executed notebook evidence and a status/gap report. Implemented the transformer benchmark, notebook 06, result files, dependency file, documentation updates, and Streamlit benchmark display. Prepared responsible AI/future work content. & Confirmed in repository history and presentation artefacts.\\
+Mario Rubiano \newline ID: 24900627 & Reviewed code, notebooks, app, outputs, and assessment requirements. Added executed notebook evidence and a status/gap report. Implemented the transformer benchmark, notebook 06, result files, dependency file, documentation updates, and Streamlit benchmark display. Prepared responsible AI and future-work content. & Notebook 06; transformer benchmark module/results; reports; responsible AI material.\\
 \addlinespace
-Andres Ethorimn \newline ID: 26029165 & Created the repository/template, shared GitHub access, maintained main, merged pull requests, cleaned large files, restored result artefacts, reviewed Mario's PR, and presented empirical results in slide notes. & Confirmed in repository history, WhatsApp evidence, and presentation artefacts.\\
+Andres Ethorimn \newline ID: 26029165 & Created and maintained the GitHub repository structure, managed access and main-branch integration, merged pull requests, cleaned large/sensitive files, restored result artefacts, reviewed integration changes, and supported empirical-results presentation. & GitHub history, repository maintenance, restored results, presentation artefacts.\\
 \addlinespace
-Amal Maawadh \newline ID: 25605864 & Supported Tumadhir in project planning and implementation direction. Shared the implementation plan covering dataset, workflow, models, metrics, demo features, and HD requirements. Drafted presentation content and notes, and presented the introduction/problem framing. & Confirmed by WhatsApp evidence and presentation artefacts.\\
+Amal Maawadh \newline ID: 25605864 & Supported project planning, implementation direction, report/presentation framing, and HD-alignment review. Added confidence-aware triage and reproducibility checks, including confidence guidance for human review. Drafted presentation content and notes, and contributed introduction/problem framing. & Confidence module/tests; reproducibility checks; project plan; presentation artefacts.\\
 \addlinespace
-Laura Pacheco \newline ID: 25940875 & Presented the solution overview, dataset explanation, and leakage-control explanation. WhatsApp evidence indicates EDA involvement and experimentation with an MLP priority model and reinforcement learning routing agent. & \pending{MLP Neural Network and reinforcement learning routing agent are mentioned in chat, but code/results are not present in current main repository content. Add branch output or keep as future work.}\\
+Laura Pacheco \newline ID: 25940875 & Contributed to solution overview, dataset explanation, leakage-control discussion, and experimental extension work. Added a reinforcement-learning routing agent and supported discussion of multi-paradigm AI integration, including neural-network/RL ideas. & \texttt{rl\_routing\_agent.py}; presentation artefacts; dataset/leakage explanation.\\
 \addlinespace
-Carl Lazarus \newline ID: 12043485 & Presented the AI methods section. WhatsApp evidence indicates that Carl added a demo slide/video and refined the demo wording. & \pending{The LLM AI assistant for ticket submission is mentioned as branch work, but code is not present in current main repository content. Add branch output or keep as future work.}\\
+Carl Lazarus \newline ID: 12043485 & Contributed to the AI methods section, demo preparation, and user-facing assistant extension. Added the Gemini-based AI assistant module that orchestrates the trained ML pipeline through tool calls for ticket triage and draft-response support. & \texttt{llm\_agent.py}; Streamlit AI Assistant integration; demo/presentation artefacts.\\
 \bottomrule
 \end{longtable}
 \normalsize

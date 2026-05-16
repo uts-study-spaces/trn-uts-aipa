@@ -29,7 +29,9 @@ def _resolve_key(api_key: str | None) -> str:
     key = api_key or os.environ.get("GEMINI_API_KEY", "")
     if not key:
         raise ValueError(
-            "No Gemini API key found. Please enter a valid API key above.\n\n**(ASSESSMENT ONLY) A valid API key for testing is available in the Canvas report submission under Section 7 - GitHub Repository.**"
+            "No Gemini API key found. Please enter a valid API key above.\n\n"
+            "A free-tier Gemini API key can be created through Google AI Studio: "
+            "https://aistudio.google.com/api-keys. A Google account is required for this."
         )
     return key
 

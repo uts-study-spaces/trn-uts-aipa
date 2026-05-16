@@ -6,7 +6,7 @@ Build an explainable AI decision-support implementation for customer service tea
 
 ## HD Alignment
 
-- Multiple AI paradigms: supervised NLP classification, rule-based reasoning, knowledge representation through routing rules, template-based summarisation, and an optional transformer-embedding benchmark for semantic multilingual representation.
+- Multiple AI paradigms: supervised NLP classification, TF-IDF structural text representation, a probabilistic Naive Bayes baseline, rule-based reasoning, MLP neural-network experimentation, reinforcement-learning routing exploration, optional transformer-embedding benchmarking, and optional Gemini-based LLM assistance.
 - Theoretical justification: compare TF-IDF Logistic Regression, Linear SVM, and Naive Bayes as explainable text classification methods.
 - Empirical evaluation: use train/validation/test splitting and report accuracy, macro precision, macro recall, macro F1, weighted F1, and confusion matrices for category and priority.
 - Additional analysis: include per-class F1 and per-language performance to support critical reflection on multilingual behaviour.
@@ -14,7 +14,11 @@ Build an explainable AI decision-support implementation for customer service tea
 
 ## Dataset
 
-Main dataset: Kaggle Multilingual Customer Support Tickets dataset.
+Main dataset: Kaggle **Multilingual Customer Support Tickets** dataset by Tobias Bueck.
+
+Dataset link: https://www.kaggle.com/datasets/tobiasbueck/multilingual-customer-support-tickets
+
+In simple terms, the dataset is a collection of example customer support requests. Each row describes one ticket, including the customer's subject/body text, language, ticket type, queue/category, priority, tags, and an agent answer. The project uses the ticket text and safe pre-resolution metadata to predict the support queue and urgency. The `answer` field is excluded because it is written after the ticket is handled and would leak future information.
 
 Kaggle provides five CSV files. Notebook `01_eda.ipynb` audits all five files, then the project merges only the three files with compatible `queue` and `priority` labels.
 
@@ -75,10 +79,12 @@ This uses `kagglehub`, which downloads the dataset from Kaggle and stores the co
 14. Save metrics, classification reports, and confusion matrices.
 15. Generate report and presentation charts from the saved results.
 16. Analyse per-class and per-language performance.
-17. Optionally compare TF-IDF features with multilingual transformer embeddings on a sampled benchmark for final report discussion.
-18. Use rule-based reasoning for routing and escalation.
-19. Use TF-IDF feature weights for explanation terms.
-20. Present the final trained system through a Streamlit interface with Overview evidence, single-ticket analysis, batch upload, and downloadable batch predictions.
+17. Test an MLP priority classifier as a multi-layer neural-network alternative.
+18. Optionally compare TF-IDF features with multilingual transformer embeddings on a sampled benchmark for final report discussion.
+19. Explore reinforcement-learning routing logic as a future operational extension.
+20. Use rule-based reasoning for routing and escalation.
+21. Use TF-IDF feature weights for explanation terms.
+22. Present the final trained system through a Streamlit interface with Overview evidence, single-ticket analysis, batch upload, AI Assistant support, and downloadable batch predictions.
 
 ## Notebooks
 
@@ -108,7 +114,7 @@ The demo app is in `app/streamlit_app.py`. It has:
 - `Overview`: evidence dashboard with dataset profile, workflow, language and priority charts, final metrics, transformer benchmark display, per-language metrics, and per-class F1 tables.
 - `Try Solution`: single-ticket prediction and a batch upload flow for CSV/XLSX/XLS files. Batch mode analyses up to 200 rows and exports a predictions CSV.
 
-The live predictions use the trained TF-IDF Linear SVM models saved in `models/`. The transformer benchmark is shown for comparison only and is not used to route tickets in the demo.
+The live predictions use the trained TF-IDF Linear SVM models saved in `models/`. MLP, Word2Vec, Top2Vec, transformer embeddings, Gemini assistance, and reinforcement-learning routing are shown or discussed as comparison/extension evidence only; they do not replace the deployed prediction path.
 
 ## Group Work Split
 
@@ -119,4 +125,4 @@ The live predictions use the trained TF-IDF Linear SVM models saved in `models/`
 - Member 5: routing, escalation, summarisation, and explainability.
 - Member 6: Streamlit demo, batch upload workflow, README, report assets, and integration testing.
 
-Update the final names and student IDs before report submission.
+Final report contributions should list each member's specific and verifiable work using repository history, notebooks, documents, and presentation artefacts.

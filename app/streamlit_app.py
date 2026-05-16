@@ -1211,7 +1211,8 @@ def ai_assistant_tab() -> None:
 
     _invalid_key_msg = (
         "The API key you entered is invalid. Please check it and try a different one using the field above.\n\n"
-        "**(ASSESSMENT ONLY) A valid API key for testing is available in the Canvas report submission under Section 7 - GitHub Repository.**"
+        "A free-tier Gemini API key can be created through Google AI Studio: "
+        "https://aistudio.google.com/api-keys. A Google account is required for this."
     )
 
     no_key = False

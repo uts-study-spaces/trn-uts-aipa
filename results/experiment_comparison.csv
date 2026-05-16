@@ -1,6 +1,8 @@
 ﻿method,task,split,macro_f1,role,decision
 TF-IDF + Linear SVM,category,test,0.524646,Selected live model,Best validated balance of performance speed and explainability
 TF-IDF + Linear SVM,priority,test,0.567824,Selected live model,Best validated balance of performance speed and explainability
+TF-IDF + SVD + MLP,priority,validation,0.531122,Neural network experiment,Lower validation macro F1 than TF-IDF Linear SVM
+TF-IDF + SVD + MLP,priority,test,0.561245,Neural network experiment,Lower held-out test macro F1 than TF-IDF Linear SVM
 TF-IDF + Logistic Regression,category,validation,0.408271,Baseline,Lower validation performance than Linear SVM
 TF-IDF + Logistic Regression,priority,validation,0.527821,Baseline,Lower validation performance than Linear SVM
 TF-IDF + Naive Bayes,category,validation,0.201916,Baseline,Simple probabilistic baseline but weak category macro F1

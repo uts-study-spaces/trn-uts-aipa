@@ -52,8 +52,7 @@ notebooks/05_final_evaluation_and_error_analysis.ipynb
 notebooks/06_transformer_embedding_benchmark.ipynb  optional, requires extra dependencies
 ```
 
-Notebook `03` compares TF-IDF and embeddings. Notebook `04` regenerates model files and main results using the vectorizer chosen in the configuration cell.
-Notebook `04` regenerates model files and main results.
+Notebook `03` compares TF-IDF and embedding-based approaches. Notebook `04` regenerates model files and main results using the selected vectorizer configuration.
 Notebook `06` is optional and supports the final report discussion about transformer-based semantic representations.
 
 ## 4. Command-Line Training
@@ -129,6 +128,10 @@ Run the sampled benchmark:
 ```
 
 This saves `results/transformer_embedding_benchmark.csv` and `results/transformer_embedding_benchmark.json`. Use it for report discussion and the Streamlit Overview evidence panel. The live ticket predictions still use the trained TF-IDF Linear SVM models.
+
+## 7A. MLP Priority Experiment
+
+The MLP priority experiment is included as comparison evidence. In the verified run, it reached priority test macro F1 of `0.561`, slightly below the TF-IDF + Linear SVM priority macro F1 of `0.568`. It should be discussed as a tested neural-network alternative, not as the deployed priority model.
 
 ## 8. Reproducibility and QA Checks
 
