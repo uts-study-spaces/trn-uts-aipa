@@ -144,6 +144,11 @@ Thumbs.db
 data/raw/*
 data/processed/*
 models/*
+reports/pdf_review_extracted_text.txt
+reports/AT3_Final_Report_Group_2_Draft.pdf
+docs/report_enhancement_brief.md
+docs/ppt_design_tool_brief.md
+docs/AI Project Brief and Q&A.docx
 *.tsv
 *.dat
 *.hdf5

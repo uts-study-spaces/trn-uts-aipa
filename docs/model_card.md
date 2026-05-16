@@ -21,19 +21,27 @@ high-risk use without human review and production monitoring.
 
 ## Data
 
-The project uses the Kaggle Multilingual Customer Support Tickets dataset. Five
-CSV files were audited and three compatible multilingual files were merged. The
-modelling dataset contains 44,275 usable tickets after filtering and
-deduplication. The post-response `answer` field is excluded to avoid target
-leakage.
+The project uses the Kaggle Multilingual Customer Support Tickets dataset by
+Tobias Bueck:
+
+https://www.kaggle.com/datasets/tobiasbueck/multilingual-customer-support-tickets
+
+The dataset contains multilingual customer support requests with fields such as
+subject, body, language, ticket type, queue/category, priority, tags, and agent
+answer. Five CSV files were audited and three compatible multilingual files
+were merged. The modelling dataset contains 44,275 usable tickets after
+filtering and deduplication. The post-response `answer` field is excluded to
+avoid target leakage.
 
 ## Model family
 
 The main deployed pipeline uses TF-IDF text representation with Linear SVM
-classification for queue and priority. Additional comparison work includes
-Logistic Regression, Naive Bayes, MLP, transformer embeddings, rule-based
-routing, reinforcement-learning routing exploration, and a Gemini-backed AI
-assistant.
+classification for both queue and priority. Additional comparison work includes
+Logistic Regression, Naive Bayes, an MLP priority experiment, Word2Vec, Top2Vec,
+transformer embeddings, rule-based routing, reinforcement-learning routing
+exploration, and a Gemini-backed AI assistant. These components support
+comparison and extension evidence; they do not replace the deployed TF-IDF
+Linear SVM prediction path.
 
 ## Amal contribution: confidence-aware ensemble
 
@@ -50,6 +58,10 @@ The main project reports accuracy, macro precision, macro recall, macro F1, and
 weighted F1. Macro F1 is prioritised because support queues and priority levels
 are not perfectly balanced. The confidence-aware extension adds coverage and
 human-review metrics to connect model confidence with safe operational use.
+
+The verified MLP priority experiment reached test macro F1 of 0.561, slightly
+below the TF-IDF + Linear SVM priority macro F1 of 0.568, so MLP is not used by
+the deployed app.
 
 ## Ethical considerations
 
